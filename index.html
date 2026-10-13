@@ -93,6 +93,14 @@ footer{text-align:center;font-size:13px;color:var(--muted);padding-top:8px}
 <script>
 const TEAMS=[["First Team","Firsts","#F0D08C",""],["Reserve Team","Reserves","#4A3719","border:1px solid #8F6A2A"],["Sunday Team","Sundays","#8F6A2A",""],["Development Team","Development","#D1A04A",""],["Old Boys","Old Boys","#7A7A7A",""]];
 const CARET='<svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D1A04A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+// Paste your GoatCounter code between the quotes to switch on visit and search counting.
+const GC_CODE="afcwinkfield";
+if(GC_CODE){const g=document.createElement("script");g.async=true;g.dataset.goatcounter=`https://${GC_CODE}.goatcounter.com/count`;g.src="//gc.zgo.at/count.js";document.head.appendChild(g)}
+function track(path,title){
+  if(!GC_CODE)return;
+  const send=()=>{if(window.goatcounter&&window.goatcounter.count){window.goatcounter.count({path,title,event:true});return true}return false};
+  if(!send())setTimeout(send,1500);
+}
 let D, names, S={p:null,s:"all",c:""};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ord=n=>{const v=n%100;return n+((v>10&&v<14)?"th":({1:"st",2:"nd",3:"rd"}[n%10]||"th"))};
@@ -103,9 +111,10 @@ const pct=(n,d,dp=0)=>d?(n/d*100).toFixed(dp):"0";
 fetch("data.json").then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{
   D=d;names=Object.keys(d.players);
   const q=new URLSearchParams(location.search);
-  S.p=names.includes(q.get("p"))?q.get("p"):(names.includes("Aaron Ark")?"Aaron Ark":names[0]);
+  S.p=names.includes(q.get("p"))?q.get("p"):"";
   S.s=(q.get("s")==="all"||d.seasons.includes(q.get("s")))?q.get("s"):"all";
   S.c=names.includes(q.get("c"))?q.get("c"):"";
+  if(q.get("p")&&names.includes(q.get("p")))track("player/"+S.p,"Player: "+S.p);
   render();
 }).catch(()=>{document.getElementById("err").textContent="Stats could not be loaded. Try again shortly."});
 
@@ -132,11 +141,11 @@ function render(){
   <header>
     <div class="brand"><img src="badge.png" alt="AFC Winkfield badge"><div><div class="lab cond" style="font-size:14px;letter-spacing:.16em">AFC Winkfield</div><h1>Player Stats</h1></div></div>
     <div class="pickers">
-      <label class="pick main"><span class="lab">Player (tap to search)</span><input id="pl" list="plist" value="${esc(S.p)}" autocomplete="off" aria-label="Player">${CARET}<datalist id="plist">${names.map(n=>`<option value="${esc(n)}">`).join("")}</datalist></label>
+      <label class="pick main"><span class="lab">Player (tap to search)</span><input id="pl" list="plist" value="${esc(S.p)}" placeholder="Type a name" autocomplete="off" aria-label="Player">${CARET}<datalist id="plist">${names.map(n=>`<option value="${esc(n)}">`).join("")}</datalist></label>
       <label class="pick small"><span class="lab">Season</span><select id="se" aria-label="Season"><option value="all"${S.s==="all"?" selected":""}>All time</option>${seasons.map(s=>`<option${S.s===s?" selected":""}>${s}</option>`).join("")}</select>${CARET.replace('stroke="#D1A04A"','stroke="#A39D90"')}</label>
     </div>
   </header>
-  ${b.a?"":`<div class="card empty">${esc(S.p)} has no appearances in ${esc(seasonLabel)}.</div>`}
+  ${!S.p?'<div class="card empty" style="flex:none;text-align:center;padding:48px 24px;font-size:18px">Search for a player above to see their stats.</div>':`${b.a?"":`<div class="card empty">${esc(S.p)} has no appearances in ${esc(seasonLabel)}.</div>`}
   <div class="row">
     <section class="card hero"><div><div class="lab">Total appearances</div><div class="big">${b.a}</div></div>
       <div class="rank"><b>${b.rk?ord(b.rk):"–"}</b><span class="lab">${S.s==="all"?"All-time appearance rank":"Appearance rank, "+esc(S.s)}</span></div></section>
@@ -164,17 +173,17 @@ function render(){
     <section class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><h2 style="margin-bottom:4px">Most played opponents</h2><span class="sub" style="margin:0">${b.no} faced</span></div><div class="sub" style="margin:0 0 8px">Games played against each side</div>
       ${b.op.length?b.op.map(([n,v],i)=>`<div class="opp"><span class="r">${i+1}</span><span class="nm">${esc(n)}</span><b>${v}</b></div>`).join(""):'<div class="empty">No data for this selection.</div>'}</section>
   </div>
-  <footer>AFC Winkfield FC · Updated ${esc(D.updated||"")}</footer>`;
+  `}
+  <footer>AFC Winkfield FC · Updated ${esc(D.updated||"")}${GC_CODE?"<br>Visits and player searches are counted anonymously. No cookies.":""}</footer>`;
 
   const pl=document.getElementById("pl"), cp=document.getElementById("cp");
   const bind=(el,key,keep)=>{
     el.addEventListener("focus",()=>{el.dataset.prev=el.value;el.value=""});
-    el.addEventListener("change",()=>{if(names.includes(el.value)){S[key]=el.value;go()}});
+    el.addEventListener("change",()=>{if(names.includes(el.value)){S[key]=el.value;track(key==="p"?"player/"+el.value:"compare/"+S.p+" vs "+el.value,(key==="p"?"Player: ":"Compare: ")+el.value);go()}});
     el.addEventListener("blur",()=>{if(!names.includes(el.value)){el.value=(key==="c"&&el.value==="")?"":el.dataset.prev||keep()}});
   };
-  bind(pl,"p",()=>S.p); bind(cp,"c",()=>S.c);
-  cp.addEventListener("input",()=>{if(cp.value===""&&S.c){S.c="";}});
-  document.getElementById("se").addEventListener("change",e=>{S.s=e.target.value;go()});
+  bind(pl,"p",()=>S.p); if(cp){bind(cp,"c",()=>S.c); cp.addEventListener("input",()=>{if(cp.value===""&&S.c){S.c="";}});}
+  document.getElementById("se").addEventListener("change",e=>{S.s=e.target.value;track("season/"+S.s,"Season: "+S.s);go()});
 }
 function go(){
   const q=new URLSearchParams();q.set("p",S.p);if(S.s!=="all")q.set("s",S.s);if(S.c)q.set("c",S.c);
