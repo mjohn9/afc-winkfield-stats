@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AFC Winkfield Player Stats</title>
+<link rel="icon" href="badge.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D0D0E;--card:#17171A;--line:#2A2A2E;--text:#F2EEE6;--muted:#A39D90;--gold:#D1A04A;--lightgold:#F0D08C}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Barlow',system-ui,sans-serif;padding:32px 48px 48px;display:flex;justify-content:center}
+@media(max-width:700px){body{padding:20px 20px 40px}}
+button,input,select{font-family:inherit;color:inherit}
+.wrap{width:100%;max-width:1280px;display:flex;flex-direction:column;gap:20px}
+.cond{font-family:'Barlow Condensed',sans-serif}
+.lab{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;flex:1 1 380px;min-width:0}
+.card h2{margin:0 0 16px;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.sub{font-size:13px;color:var(--muted);margin:-12px 0 16px}
+header{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:18px}
+.brand img{height:84px;width:auto;display:block}
+@media(max-width:700px){.brand img{height:60px}}
+h1{margin:0;font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
+@media(max-width:700px){h1{font-size:26px}}
+.pickers{display:flex;gap:12px;flex-wrap:wrap}
+.pick{display:flex;flex-direction:column;justify-content:center;min-height:64px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 18px;position:relative}
+.pick.main{border-color:var(--gold);width:300px}
+.pick.small{width:200px}
+@media(max-width:700px){.pickers{width:100%}.pick.main{flex:2 1 220px;width:auto}.pick.small{flex:1 1 130px;width:auto}}
+.pick input,.pick select{background:transparent;border:0;outline:0;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:600;padding:0;width:100%;appearance:none;-webkit-appearance:none}
+.pick select{cursor:pointer}
+.pick select option{background:var(--card);color:var(--text);font-size:16px}
+.pick:focus-within{box-shadow:0 0 0 2px rgba(209,160,74,.45)}
+.pick .caret{position:absolute;right:16px;bottom:18px;pointer-events:none}
+.hero{display:flex;flex-direction:column;justify-content:space-between;gap:16px;flex:1 1 340px}
+.big{font-family:'Barlow Condensed',sans-serif;font-size:132px;font-weight:700;line-height:.95;color:var(--gold)}
+@media(max-width:700px){.big{font-size:96px}}
+.rank{display:flex;align-items:baseline;gap:12px}
+.rank b{font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:600;line-height:1}
+.stats{flex:2 1 560px;padding-top:8px;padding-bottom:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid3+.grid3{border-top:1px solid var(--line)}
+.stat{padding:28px 0 28px 24px;border-right:1px solid var(--line)}
+.stat:first-child{padding-left:0}
+.stat:last-child{border-right:0}
+.stat .v{display:flex;align-items:center;gap:10px;font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:600;line-height:1}
+@media(max-width:700px){.stat{padding:16px 0 16px 14px}.stat .v{font-size:40px}}
+.sw{width:14px;height:20px;border-radius:3px;display:block}
+.bar{display:flex;height:22px;border-radius:6px;overflow:hidden;gap:2px}
+.bar div{min-width:0}
+.wdl{display:flex;gap:16px;margin-top:20px}
+.wdl>div{flex:1;min-width:0}
+.wdl .v{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:600;line-height:1;margin-top:8px}
+.wdl .g{font-size:14px;color:var(--muted);margin-top:2px}
+.dot{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+.legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px;margin-top:20px}
+.legend div{display:flex;align-items:center;gap:10px;font-size:15px}
+.legend div{min-width:0}
+.legend span.n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:700px){.card{padding:20px}.legend{gap:12px 14px;grid-template-columns:1fr}}
+.legend b{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:600}
+.rows{display:flex;flex-direction:column;gap:14px}
+.rows .t{display:flex;justify-content:space-between;gap:12px;font-size:16px;margin-bottom:6px}
+.rows .t b{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:600}
+.track{height:6px;background:#26262A;border-radius:3px}
+.track i{display:block;height:6px;background:var(--gold);border-radius:3px}
+.opp{display:flex;align-items:center;gap:14px;min-height:44px;border-top:1px solid var(--line)}
+.opp .r{width:28px;font-family:'Barlow Condensed',sans-serif;font-size:18px;color:var(--muted)}
+.opp .nm{flex:1;min-width:0}
+.opp b{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:600}
+.h2h{display:flex;align-items:center;min-height:56px;border-top:1px solid var(--line)}
+.h2h .a,.h2h .b{flex:1;font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:600}
+.h2h .b{text-align:right}
+.h2h .l{flex:1;text-align:center}
+.win{color:var(--gold)}
+.dim{color:#6B6558}
+.cmp{display:flex;gap:10px;margin-bottom:8px}
+.cmp>*{flex:1;min-width:0}
+.cmp .me{display:flex;align-items:center;padding:0 14px;min-height:48px;border-radius:12px;background:var(--bg);border:1px solid var(--gold);font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:600}
+.cmp input{min-height:48px;padding:0 14px;border-radius:12px;background:var(--bg);border:1px dashed #6B6558;font-size:15px;outline:0}
+.cmp input:focus{border-color:var(--gold)}
+.empty{color:var(--muted);padding:12px 0}
+footer{text-align:center;font-size:13px;color:var(--muted);padding-top:8px}
+#err{padding:40px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div id="err">Loading stats…</div></div>
+<script>
+const TEAMS=[["First Team","Firsts","#F0D08C",""],["Reserve Team","Reserves","#4A3719","border:1px solid #8F6A2A"],["Sunday Team","Sundays","#8F6A2A",""],["Development Team","Development","#D1A04A",""],["Old Boys","Old Boys","#7A7A7A",""]];
+const CARET='<svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D1A04A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+let D, names, S={p:null,s:"all",c:""};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ord=n=>{const v=n%100;return n+((v>10&&v<14)?"th":({1:"st",2:"nd",3:"rd"}[n%10]||"th"))};
+const ZERO={a:0,g:0,as:0,y:0,r:0,cs:0,w:0,d:0,l:0,t:{},tm:[],mg:[],op:[],no:0,rk:0};
+const blk=(p,s)=>(D.players[p]&&D.players[p][s])||ZERO;
+const pct=(n,d,dp=0)=>d?(n/d*100).toFixed(dp):"0";
+
+fetch("data.json").then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{
+  D=d;names=Object.keys(d.players);
+  const q=new URLSearchParams(location.search);
+  S.p=names.includes(q.get("p"))?q.get("p"):(names.includes("Aaron Ark")?"Aaron Ark":names[0]);
+  S.s=(q.get("s")==="all"||d.seasons.includes(q.get("s")))?q.get("s"):"all";
+  S.c=names.includes(q.get("c"))?q.get("c"):"";
+  render();
+}).catch(()=>{document.getElementById("err").textContent="Stats could not be loaded. Try again shortly."});
+
+function bars(list){
+  if(!list.length)return '<div class="empty">No data for this selection.</div>';
+  const mx=list[0][1];
+  return '<div class="rows">'+list.map(([n,v])=>`<div><div class="t"><span>${esc(n)}</span><b>${v}</b></div><div class="track"><i style="width:${(v/mx*100).toFixed(1)}%"></i></div></div>`).join("")+"</div>";
+}
+function stat(v,l,sw){return `<div class="stat"><div class="v">${sw?`<span class="sw" style="background:${sw}"></span>`:""}${v}</div><div class="lab" style="margin-top:6px">${l}</div></div>`}
+
+function render(){
+  const b=blk(S.p,S.s), cb=S.c?blk(S.c,S.s):null;
+  const seasonLabel=S.s==="all"?"All time":S.s;
+  const ga=b.a?((b.g+b.as)/b.a).toFixed(2):"0.00";
+  const tTotal=Object.values(b.t).reduce((x,y)=>x+y,0);
+  const teamRows=TEAMS.map(([k,l,c,x])=>({l,c,x,n:b.t[k]||0}));
+  const seasons=D.seasons.slice().reverse();
+  const cmpRow=(l,f,fmt=v=>v)=>{
+    const x=f(b),y=cb?f(cb):null;
+    const cl=cb?(x>y?"a win":(y>x?"a":"a")):"a", cr=cb?(y>x?"b win":"b"):"b dim";
+    return `<div class="h2h"><span class="${cl}">${fmt(x)}</span><span class="l lab">${l}</span><span class="${cr}">${cb?fmt(y):"–"}</span></div>`;
+  };
+  document.getElementById("app").innerHTML=`
+  <header>
+    <div class="brand"><img src="badge.png" alt="AFC Winkfield badge"><div><div class="lab cond" style="font-size:14px;letter-spacing:.16em">AFC Winkfield</div><h1>Player Stats</h1></div></div>
+    <div class="pickers">
+      <label class="pick main"><span class="lab">Player (tap to search)</span><input id="pl" list="plist" value="${esc(S.p)}" autocomplete="off" aria-label="Player">${CARET}<datalist id="plist">${names.map(n=>`<option value="${esc(n)}">`).join("")}</datalist></label>
+      <label class="pick small"><span class="lab">Season</span><select id="se" aria-label="Season"><option value="all"${S.s==="all"?" selected":""}>All time</option>${seasons.map(s=>`<option${S.s===s?" selected":""}>${s}</option>`).join("")}</select>${CARET.replace('stroke="#D1A04A"','stroke="#A39D90"')}</label>
+    </div>
+  </header>
+  ${b.a?"":`<div class="card empty">${esc(S.p)} has no appearances in ${esc(seasonLabel)}.</div>`}
+  <div class="row">
+    <section class="card hero"><div><div class="lab">Total appearances</div><div class="big">${b.a}</div></div>
+      <div class="rank"><b>${b.rk?ord(b.rk):"–"}</b><span class="lab">${S.s==="all"?"All-time appearance rank":"Appearance rank, "+esc(S.s)}</span></div></section>
+    <section class="card stats"><div class="grid3">${stat(b.g,"Goals")}${stat(b.as,"Assists")}${stat(ga,"G/A per game")}</div>
+      <div class="grid3">${stat(b.cs,"Clean sheets")}${stat(b.y,"Yellow cards","#F2C94C")}${stat(b.r,"Red cards","#E5484D")}</div></section>
+  </div>
+  <div class="row">
+    <section class="card"><h2>Results</h2>
+      <div class="bar"><div style="flex:${b.w} 1 0;background:#F0D08C"></div><div style="flex:${b.d} 1 0;background:#8A8578"></div><div style="flex:${b.l} 1 0;background:#C8383D"></div></div>
+      <div class="wdl">
+        <div><div class="lab"><span class="dot" style="background:#F0D08C"></span>Won</div><div class="v">${pct(b.w,b.a)}%</div><div class="g">${b.w} games</div></div>
+        <div><div class="lab"><span class="dot" style="background:#8A8578"></span>Drawn</div><div class="v">${pct(b.d,b.a)}%</div><div class="g">${b.d} games</div></div>
+        <div><div class="lab"><span class="dot" style="background:#C8383D"></span>Lost</div><div class="v">${pct(b.l,b.a)}%</div><div class="g">${b.l} games</div></div>
+      </div></section>
+    <section class="card"><h2>Appearances by team</h2>
+      <div class="bar">${teamRows.map(t=>`<div style="flex:${t.n} 1 0;background:${t.c}"></div>`).join("")}</div>
+      <div class="legend">${teamRows.map(t=>`<div><span class="dot" style="background:${t.c};margin:0;flex:none;${t.x}"></span><span class="n">${t.l}</span><b>${pct(t.n,tTotal,1)}%</b></div>`).join("")}</div></section>
+    <section class="card"><h2>Head to head</h2>
+      <div class="cmp"><div class="me">${esc(S.p)}</div><input id="cp" list="plist" value="${esc(S.c)}" placeholder="Choose player" autocomplete="off" aria-label="Compare with"></div>
+      ${cmpRow("Appearances",x=>x.a)}${cmpRow("Goals",x=>x.g)}${cmpRow("Assists",x=>x.as)}${cmpRow("Clean sheets",x=>x.cs)}${cmpRow("Win rate",x=>x.a?x.w/x.a:0,v=>(v*100).toFixed(0)+"%")}</section>
+  </div>
+  <div class="row">
+    <section class="card"><h2>Top teammates</h2><div class="sub">Games played together</div>${bars(b.tm)}</section>
+    <section class="card"><h2>Top managers</h2><div class="sub">Appearances under each manager</div>${bars(b.mg)}</section>
+    <section class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><h2 style="margin-bottom:4px">Most played opponents</h2><span class="sub" style="margin:0">${b.no} faced</span></div><div class="sub" style="margin:0 0 8px">Games played against each side</div>
+      ${b.op.length?b.op.map(([n,v],i)=>`<div class="opp"><span class="r">${i+1}</span><span class="nm">${esc(n)}</span><b>${v}</b></div>`).join(""):'<div class="empty">No data for this selection.</div>'}</section>
+  </div>
+  <footer>AFC Winkfield FC · Updated ${esc(D.updated||"")}</footer>`;
+
+  const pl=document.getElementById("pl"), cp=document.getElementById("cp");
+  const bind=(el,key,keep)=>{
+    el.addEventListener("focus",()=>{el.dataset.prev=el.value;el.value=""});
+    el.addEventListener("change",()=>{if(names.includes(el.value)){S[key]=el.value;go()}});
+    el.addEventListener("blur",()=>{if(!names.includes(el.value)){el.value=(key==="c"&&el.value==="")?"":el.dataset.prev||keep()}});
+  };
+  bind(pl,"p",()=>S.p); bind(cp,"c",()=>S.c);
+  cp.addEventListener("input",()=>{if(cp.value===""&&S.c){S.c="";}});
+  document.getElementById("se").addEventListener("change",e=>{S.s=e.target.value;go()});
+}
+function go(){
+  const q=new URLSearchParams();q.set("p",S.p);if(S.s!=="all")q.set("s",S.s);if(S.c)q.set("c",S.c);
+  history.replaceState(null,"","?"+q.toString());render();
+}
+</script>
+</body>
+</html>
