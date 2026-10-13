@@ -28,7 +28,7 @@ def fetch_table(api, token, table_id):
     while url:
         for attempt in range(5):
             try:
-                req = Request(url, headers={"Authorization": f"Token {token}"})
+                req = Request(url, headers={"Authorization": f"Token {token}", "Accept": "application/json", "User-Agent": "Mozilla/5.0 (compatible; afc-winkfield-dashboard/1.0)"})
                 with urlopen(req, timeout=60) as r:
                     page = json.load(r)
                 break
