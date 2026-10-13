@@ -36,7 +36,8 @@ def fetch_table(api, token, table_id):
                 if e.code == 429 and attempt < 4:
                     time.sleep(2 ** attempt)
                     continue
-                raise SystemExit(f"Baserow returned {e.code} for table {table_id}. Check the token and table id.")
+                body = e.read().decode("utf-8", "replace")[:300]
+                raise SystemExit(f"Baserow returned {e.code} for table {table_id}. Check the token, its read permission and the table id. Response: {body}")
         rows += page["results"]
         url = page.get("next")
     return rows
@@ -71,6 +72,15 @@ def num(v):
         return float(s)
     except ValueError:
         return 0.0
+
+
+def check_fields(rows, needed, label):
+    if not rows:
+        raise SystemExit(f"The {label} table returned no rows. Check the table id and that the token has read permission on it.")
+    have = set(rows[0].keys())
+    missing = [f for f in needed if f not in have]
+    if missing:
+        raise SystemExit(f"{label}: these fields were not found: {missing}. Fields that do exist: {sorted(have)}")
 
 
 # ---------- build ----------
@@ -160,6 +170,8 @@ def main():
         api = os.environ.get("BASEROW_API", "https://api.baserow.io").rstrip("/")
         app, st = fetch_table(api, token, ta), fetch_table(api, token, ts)
 
+    check_fields(app, ["Name", "Match ID", "Season", "Team", "Manager", "Opponent", "Win (Number)", "Draw", "Loss", "Clean Sheet"], "Appearances")
+    check_fields(st, ["Name", "Season", "Goals", "Assists", "Yellow Cards", "Red Cards"], "Season Stats")
     data = build(app, st)
     if not data["players"]:
         raise SystemExit("No appearances found. Check the table ids and field names.")
