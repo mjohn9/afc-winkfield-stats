@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AFC Winkfield Manager Stats</title>
+<link rel="icon" href="badge.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D0D0E;--card:#17171A;--line:#2A2A2E;--text:#F2EEE6;--muted:#A39D90;--gold:#D1A04A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Barlow',system-ui,sans-serif;padding:32px 48px 48px;display:flex;justify-content:center}
+@media(max-width:700px){body{padding:20px 20px 40px}}
+button,input,select{font-family:inherit;color:inherit}
+a{color:inherit}
+.wrap{width:100%;max-width:1280px;display:flex;flex-direction:column;gap:20px}
+.lab{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;flex:1 1 380px;min-width:0}
+.card.full{flex:1 1 100%}
+@media(max-width:700px){.card{padding:20px}}
+.card h2{margin:0 0 16px;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.sub{font-size:13px;color:var(--muted);margin:-12px 0 16px}
+header{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:18px}
+.brand img{height:84px;width:auto;display:block}
+@media(max-width:700px){.brand img{height:60px}}
+h1{margin:0;font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
+@media(max-width:700px){h1{font-size:26px}}
+.nav{display:flex;gap:8px;flex-wrap:wrap}
+.nav a{padding:10px 18px;border:1px solid var(--line);border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;color:var(--muted)}
+.nav a.on{border-color:var(--gold);color:var(--gold)}
+.pickers{display:flex;gap:12px;flex-wrap:wrap}
+.pick{display:flex;flex-direction:column;justify-content:center;min-height:64px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 18px;position:relative;width:200px}
+.pick.main{border-color:var(--gold);width:260px}
+@media(max-width:700px){.pickers{width:100%}.pick,.pick.main{flex:1 1 130px;width:auto}.pick.main{flex:1 1 100%}}
+.pick select{background:transparent;border:0;outline:0;font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:600;padding:0;width:100%;appearance:none;-webkit-appearance:none;cursor:pointer}
+.pick select option{background:var(--card);color:var(--text);font-size:16px}
+.pick:focus-within{box-shadow:0 0 0 2px rgba(209,160,74,.45)}
+.pick .caret{position:absolute;right:16px;bottom:18px;pointer-events:none}
+.hero{display:flex;flex-direction:column;justify-content:space-between;gap:16px;flex:1 1 340px}
+.big{font-family:'Barlow Condensed',sans-serif;font-size:132px;font-weight:700;line-height:.95;color:var(--gold)}
+@media(max-width:700px){.big{font-size:96px}}
+.stats{flex:2 1 560px;padding-top:8px;padding-bottom:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid3+.grid3{border-top:1px solid var(--line)}
+.stat{padding:28px 0 28px 24px;border-right:1px solid var(--line)}
+.stat:first-child{padding-left:0}
+.stat:last-child{border-right:0}
+.stat .v{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:600;line-height:1}
+@media(max-width:700px){.stat{padding:16px 0 16px 14px}.stat .v{font-size:40px}}
+.bar{display:flex;height:22px;border-radius:6px;overflow:hidden;gap:2px}
+.bar div{min-width:0}
+.dot{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}
+th{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{text-align:right;padding:12px 10px;border-top:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;padding-left:0}
+td.nm{white-space:normal;min-width:140px}
+td a{text-decoration:none}
+td a:hover{color:var(--gold)}
+tr.hl td{color:var(--gold)}
+tr.tot td{font-weight:600;border-top:2px solid var(--line)}
+@media(max-width:700px){th,td{padding-left:6px;padding-right:6px}th:first-child,td:first-child{padding-left:0}}
+.rec{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:14px 0;border-top:1px solid var(--line)}
+.rec:first-of-type{border-top:0;padding-top:0}
+.rec .k{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.rec .d{font-size:14px;color:var(--muted);margin-top:2px}
+.rec .v{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:600;line-height:1;white-space:nowrap}
+.rows{display:flex;flex-direction:column;gap:14px}
+.rows .t{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:16px;margin-bottom:6px}
+.rows .t b{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:600;white-space:nowrap}
+.rows .t small{font-size:13px;color:var(--muted);font-weight:400;margin-left:6px}
+.rows .t a{text-decoration:none}
+.rows .t a:hover{color:var(--gold)}
+.track{height:6px;background:#26262A;border-radius:3px}
+.track i{display:block;height:6px;background:var(--gold);border-radius:3px}
+.note{font-size:13px;color:var(--muted);margin-top:14px}
+.empty{color:var(--muted);padding:12px 0}
+.link{background:none;border:0;color:var(--gold);font-size:15px;font-weight:600;cursor:pointer;padding:0}
+footer{text-align:center;font-size:13px;color:var(--muted);padding-top:8px}
+#err{padding:40px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div id="err">Loading manager stats…</div></div>
+<script src="config.js"></script>
+<script>
+const TEAMS=[["First Team","Firsts"],["Reserve Team","Reserves"],["Sunday Team","Sundays"],["Development Team","Development"],["Old Boys","Old Boys"]];
+const TL=Object.fromEntries(TEAMS);
+const CARET='<svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A39D90" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+let C,MG,M=[],SEASONS=[],NAMES=[],S={m:"",t:"all",s:"all"};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pct=(n,d,dp=0)=>d?(n/d*100).toFixed(dp):"0";
+const fmtDate=iso=>{if(!iso)return"";return new Date(iso+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})};
+const mgrs=m=>(m.mgr||"").split(",").map(s=>s.trim()).filter(Boolean);
+
+Promise.all([
+  fetch("club.json").then(r=>{if(!r.ok)throw 0;return r.json()}),
+  fetch("managers.json").then(r=>{if(!r.ok)throw 0;return r.json()})
+]).then(([c,mg])=>{
+  C=c;
+  MG=mg.rows.map(a=>({m:a[0],p:a[1],season:a[2],team:a[3],a:a[4],w:a[5],d:a[6],l:a[7],cs:a[8]}));
+  M=c.matches.map(a=>({id:a[0],date:a[1],season:a[2],team:a[3],opp:a[4],gf:a[5],ga:a[6],res:a[7],cs:a[8],squad:a[9],mgr:a[10]}));
+  SEASONS=[...new Set(M.map(x=>x.season))].sort();
+  const cnt={};for(const m of M)for(const n of mgrs(m))cnt[n]=(cnt[n]||0)+1;
+  NAMES=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b));
+  const q=new URLSearchParams(location.search);
+  if(NAMES.includes(q.get("m")))S.m=q.get("m");
+  if(TL[q.get("t")])S.t=q.get("t");
+  if(SEASONS.includes(q.get("s")))S.s=q.get("s");
+  if(S.m)track("manager/"+S.m,"Manager: "+S.m);
+  render();
+}).catch(()=>{document.getElementById("err").textContent="Manager stats could not be loaded. The data may not be ready yet."});
+
+const mm=(name,team=S.t,season=S.s)=>M.filter(m=>mgrs(m).includes(name)&&(team==="all"||m.team===team)&&(season==="all"||m.season===season));
+function sum(rs){const s={p:rs.length,w:0,d:0,l:0,gf:0,ga:0,cs:0};for(const m of rs){s[m.res.toLowerCase()]++;s.gf+=m.gf;s.ga+=m.ga;s.cs+=m.cs}return s}
+function stat(v,l){return `<div class="stat"><div class="v">${v}</div><div class="lab" style="margin-top:6px">${l}</div></div>`}
+function bestStreak(rs,test){
+  let best=null;const by={};
+  for(const m of rs)(by[m.team]=by[m.team]||[]).push(m);
+  for(const t in by){
+    const a=by[t].slice().sort((x,y)=>x.date<y.date?-1:x.date>y.date?1:x.id-y.id);let run=[];
+    const close=()=>{if(run.length&&(!best||run.length>=best.n))best={n:run.length,team:t,from:run[0].date,to:run[run.length-1].date};run=[]};
+    for(const m of a){if(test(m))run.push(m);else close()}close();
+  }
+  return best;
+}
+function bestWin(rs){let b=null;for(const m of rs){if(m.res!=="W"||m.gf<=m.ga)continue;const d=m.gf-m.ga;if(!b||d>b.d||(d===b.d&&(m.gf>b.gf||(m.gf===b.gf&&m.date>b.date))))b={...m,d}}return b}
+function players(name){
+  const g={};
+  for(const r of MG){
+    if(r.m!==name||(S.t!=="all"&&r.team!==S.t)||(S.s!=="all"&&r.season!==S.s))continue;
+    const o=g[r.p]=g[r.p]||{n:r.p,a:0,w:0,d:0,l:0,cs:0};o.a+=r.a;o.w+=r.w;o.d+=r.d;o.l+=r.l;o.cs+=r.cs;
+  }
+  return Object.values(g);
+}
+function list(items,fmtVal,scale){
+  if(!items.length)return '<div class="empty">No data for this selection.</div>';
+  const mx=scale||items[0].v||1;
+  return '<div class="rows">'+items.map(i=>`<div><div class="t"><span><a href="index.html?p=${encodeURIComponent(i.n)}">${esc(i.n)}</a>${i.sub?`<small>${i.sub}</small>`:""}</span><b>${fmtVal(i.v)}</b></div><div class="track"><i style="width:${Math.min(100,i.v/mx*100).toFixed(1)}%"></i></div></div>`).join("")+"</div>";
+}
+function selectOpts(){return NAMES.map(n=>`<option${S.m===n?" selected":""}>${esc(n)}</option>`).join("")}
+
+function overview(){
+  const rows=NAMES.map(n=>{const ms=mm(n);const t=sum(ms);const ss=[...new Set(ms.map(x=>x.season))].sort();return {n,...t,span:ss.length?(ss.length>1?ss[0]+" to "+ss[ss.length-1]:ss[0]):""}}).filter(r=>r.p>0).sort((a,b)=>b.p-a.p||a.n.localeCompare(b.n));
+  return `<div class="row"><section class="card full"><h2>All managers</h2><div class="sub">${S.t==="all"?"All teams":TL[S.t]} · ${S.s==="all"?"All time":S.s}. Tap a name for their page.</div>
+  <div class="scroll"><table><thead><tr><th>Manager</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>Win %</th><th>Seasons</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr><td class="nm"><a href="?m=${encodeURIComponent(r.n)}" data-m="${esc(r.n)}">${esc(r.n)}</a></td><td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td>${pct(r.w,r.p)}%</td><td>${r.span}</td></tr>`).join("")||'<tr><td colspan="9" class="empty">No matches for this selection.</td></tr>'}
+  </tbody></table></div></section></div>`;
+}
+
+function detail(){
+  const name=S.m,ms=mm(name),t=sum(ms),scope=`${S.t==="all"?"All teams":TL[S.t]} · ${S.s==="all"?"All time":S.s}`;
+  if(!t.p)return `<div class="row"><section class="card full"><div class="empty">${esc(name)} has no matches for this selection.</div><button type="button" class="link" data-all="1">Back to all managers</button></section></div>`;
+  const ps=players(name),minA=S.s==="all"?10:5;
+  const played=ps.slice().sort((a,b)=>b.a-a.a||b.w-a.w||a.n.localeCompare(b.n)).slice(0,10).map(p=>({n:p.n,v:p.a,sub:`${p.w}W ${p.d}D ${p.l}L`}));
+  const wins=ps.filter(p=>p.w>0).sort((a,b)=>b.w-a.w||(b.w/b.a)-(a.w/a.a)||a.n.localeCompare(b.n)).slice(0,10).map(p=>({n:p.n,v:p.w,sub:`${pct(p.w,p.a)}% of ${p.a}`}));
+  const rate=ps.filter(p=>p.a>=minA).sort((a,b)=>(b.w/b.a)-(a.w/a.a)||b.a-a.a||a.n.localeCompare(b.n)).slice(0,10).map(p=>({n:p.n,v:p.w/p.a*100,sub:`${p.w} of ${p.a}`}));
+  const csl=ps.filter(p=>p.cs>0).sort((a,b)=>b.cs-a.cs||a.n.localeCompare(b.n)).slice(0,10).map(p=>({n:p.n,v:p.cs,sub:`in ${p.a} games`}));
+  const seasonRows=SEASONS.slice().reverse().map(s=>({s,...sum(mm(name,S.t,s))})).filter(r=>r.p>0);
+  const teamRows=TEAMS.map(([k,lbl])=>({lbl,...sum(mm(name,k,S.s))})).filter(r=>r.p>0);
+  const win=bestWin(ms),unb=bestStreak(ms,m=>m.res!=="L"),wr=bestStreak(ms,m=>m.res==="W"),cs=bestStreak(ms,m=>m.cs===1);
+  const sk=(l,x)=>x?`<div class="rec"><div><div class="k">${l}</div><div class="d">${TL[x.team]||esc(x.team)}, ${fmtDate(x.from)} to ${fmtDate(x.to)}</div></div><div class="v">${x.n} games</div></div>`:"";
+  const og={};for(const m of ms){const o=og[m.opp]=og[m.opp]||{n:m.opp,p:0,w:0,d:0,l:0};o.p++;o[m.res.toLowerCase()]++}
+  const opps=Object.values(og).sort((a,b)=>b.p-a.p||b.w-a.w||a.n.localeCompare(b.n)).slice(0,10);
+  const tr=r=>`<td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td>${pct(r.w,r.p)}%</td>`;
+  const head="<th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>Win %</th>";
+  return `
+  <div class="row">
+    <section class="card hero"><div><div class="lab">Games managed</div><div class="big">${t.p}</div><div class="lab" style="margin-top:6px">${esc(name)} · ${esc(scope)}</div></div>
+      <div><div class="bar"><div style="flex:${t.w} 1 0;background:#F0D08C"></div><div style="flex:${t.d} 1 0;background:#8A8578"></div><div style="flex:${t.l} 1 0;background:#C8383D"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:15px"><span><span class="dot" style="background:#F0D08C"></span>Won ${pct(t.w,t.p)}%</span><span><span class="dot" style="background:#8A8578"></span>Drawn ${pct(t.d,t.p)}%</span><span><span class="dot" style="background:#C8383D"></span>Lost ${pct(t.l,t.p)}%</span></div></div></section>
+    <section class="card stats"><div class="grid3">${stat(t.w,"Won")}${stat(t.d,"Drawn")}${stat(t.l,"Lost")}</div>
+      <div class="grid3">${stat(t.gf,"Goals for")}${stat(t.ga,"Goals against")}${stat(t.cs,"Clean sheets")}</div></section>
+  </div>
+  <div class="row">
+    <section class="card"><h2>Most played players</h2><div class="sub">Appearances under ${esc(name)}</div>${list(played,v=>v)}</section>
+    <section class="card"><h2>Most wins together</h2><div class="sub">Games won with the player in the team</div>${list(wins,v=>v)}</section>
+  </div>
+  <div class="row">
+    <section class="card"><h2>Best win rate</h2><div class="sub">Share of games won with the player in the team</div>${list(rate,v=>v.toFixed(0)+"%",100)}<div class="note">Players need at least ${minA} games under ${esc(name)} to appear here.</div></section>
+    <section class="card"><h2>Most clean sheets together</h2><div class="sub">Games without conceding</div>${list(csl,v=>v)}</section>
+  </div>
+  <div class="row">
+    <section class="card"><h2>Records</h2><div class="sub">${esc(scope)}</div>
+      ${win?`<div class="rec"><div><div class="k">Biggest win</div><div class="d">${TL[win.team]||esc(win.team)} v ${esc(win.opp)}, ${fmtDate(win.date)}</div></div><div class="v">${win.gf}-${win.ga}</div></div>`:""}
+      ${sk("Longest unbeaten run",unb)}${sk("Longest winning run",wr)}${sk("Longest clean sheet run",cs)}</section>
+    <section class="card"><h2>By team</h2><div class="sub">${S.s==="all"?"All time":S.s}</div>
+      <div class="scroll"><table><thead><tr><th>Team</th>${head}</tr></thead><tbody>${teamRows.map(r=>`<tr><td class="nm">${r.lbl}</td>${tr(r)}</tr>`).join("")}</tbody></table></div></section>
+  </div>
+  <div class="row"><section class="card full"><h2>Season by season</h2><div class="sub">${S.t==="all"?"All teams":TL[S.t]}</div>
+    <div class="scroll"><table><thead><tr><th>Season</th>${head}</tr></thead><tbody>${seasonRows.map(r=>`<tr class="${S.s===r.s?"hl":""}"><td>${r.s}</td>${tr(r)}</tr>`).join("")}</tbody></table></div></section></div>
+  <div class="row"><section class="card full"><h2>Most played opponents</h2><div class="sub">${esc(scope)}</div>
+    <div class="scroll"><table><thead><tr><th>Opponent</th><th>P</th><th>W</th><th>D</th><th>L</th></tr></thead><tbody>${opps.map(o=>`<tr><td class="nm">${esc(o.n)}</td><td>${o.p}</td><td>${o.w}</td><td>${o.d}</td><td>${o.l}</td></tr>`).join("")}</tbody></table></div></section></div>
+  <div><button type="button" class="link" data-all="1">Back to all managers</button></div>`;
+}
+
+function render(){
+  document.getElementById("app").innerHTML=`
+  <header>
+    <div class="brand"><img src="badge.png" alt="AFC Winkfield badge"><div><div class="lab" style="font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.16em">AFC Winkfield</div><h1>Manager Stats</h1></div></div>
+    <div class="pickers">
+      <label class="pick main"><span class="lab">Manager</span><select id="sm" aria-label="Manager"><option value="">All managers</option>${selectOpts()}</select>${CARET}</label>
+      <label class="pick"><span class="lab">Team</span><select id="st" aria-label="Team"><option value="all">All teams</option>${TEAMS.map(([k,l])=>`<option value="${k}"${S.t===k?" selected":""}>${l}</option>`).join("")}</select>${CARET}</label>
+      <label class="pick"><span class="lab">Season</span><select id="ss" aria-label="Season"><option value="all">All time</option>${SEASONS.slice().reverse().map(s=>`<option${S.s===s?" selected":""}>${s}</option>`).join("")}</select>${CARET}</label>
+    </div>
+  </header>
+  <nav class="nav"><a href="index.html">Players</a><a href="club.html">Club</a><a href="managers.html" class="on">Managers</a></nav>
+  ${S.m?detail():overview()}
+  <footer>AFC Winkfield FC · Updated ${esc(C.updated||"")}</footer>`;
+  document.getElementById("sm").addEventListener("change",e=>{S.m=e.target.value;if(S.m)track("manager/"+S.m,"Manager: "+S.m);go()});
+  document.getElementById("st").addEventListener("change",e=>{S.t=e.target.value;go()});
+  document.getElementById("ss").addEventListener("change",e=>{S.s=e.target.value;go()});
+  document.querySelectorAll("[data-m]").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();S.m=a.dataset.m;track("manager/"+S.m,"Manager: "+S.m);go();window.scrollTo(0,0)}));
+  document.querySelectorAll("[data-all]").forEach(b=>b.addEventListener("click",()=>{S.m="";go();window.scrollTo(0,0)}));
+}
+function go(){
+  const q=new URLSearchParams();if(S.m)q.set("m",S.m);if(S.t!=="all")q.set("t",S.t);if(S.s!=="all")q.set("s",S.s);
+  history.replaceState(null,"",q.toString()?"?"+q.toString():location.pathname);render();
+}
+</script>
+</body>
+</html>

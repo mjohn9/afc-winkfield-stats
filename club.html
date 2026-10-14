@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AFC Winkfield Club Stats</title>
+<link rel="icon" href="badge.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D0D0E;--card:#17171A;--line:#2A2A2E;--text:#F2EEE6;--muted:#A39D90;--gold:#D1A04A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Barlow',system-ui,sans-serif;padding:32px 48px 48px;display:flex;justify-content:center}
+@media(max-width:700px){body{padding:20px 20px 40px}}
+button,input,select{font-family:inherit;color:inherit}
+a{color:inherit}
+.wrap{width:100%;max-width:1280px;display:flex;flex-direction:column;gap:20px}
+.lab{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;flex:1 1 380px;min-width:0}
+.card.full{flex:1 1 100%}
+@media(max-width:700px){.card{padding:20px}}
+.card h2{margin:0 0 16px;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.sub{font-size:13px;color:var(--muted);margin:-12px 0 16px}
+header{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:18px}
+.brand img{height:84px;width:auto;display:block}
+@media(max-width:700px){.brand img{height:60px}}
+h1{margin:0;font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
+@media(max-width:700px){h1{font-size:26px}}
+.pickers{display:flex;gap:12px;flex-wrap:wrap}
+.pick{display:flex;flex-direction:column;justify-content:center;min-height:64px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 18px;position:relative;width:200px;text-decoration:none}
+.nav{display:flex;gap:8px;flex-wrap:wrap}
+.nav a{padding:10px 18px;border:1px solid var(--line);border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;color:var(--muted)}
+.nav a.on{border-color:var(--gold);color:var(--gold)}
+@media(max-width:700px){.pickers{width:100%}.pick{flex:1 1 130px;width:auto}}
+.pick select{background:transparent;border:0;outline:0;font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:600;padding:0;width:100%;appearance:none;-webkit-appearance:none;cursor:pointer}
+.pick select option{background:var(--card);color:var(--text);font-size:16px}
+.pick .nm{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:600;line-height:1.2}
+.pick:focus-within{box-shadow:0 0 0 2px rgba(209,160,74,.45)}
+.pick .caret{position:absolute;right:16px;bottom:18px;pointer-events:none}
+.hero{display:flex;flex-direction:column;justify-content:space-between;gap:16px;flex:1 1 340px}
+.big{font-family:'Barlow Condensed',sans-serif;font-size:132px;font-weight:700;line-height:.95;color:var(--gold)}
+@media(max-width:700px){.big{font-size:96px}}
+.stats{flex:2 1 560px;padding-top:8px;padding-bottom:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid3+.grid3{border-top:1px solid var(--line)}
+.stat{padding:28px 0 28px 24px;border-right:1px solid var(--line)}
+.stat:first-child{padding-left:0}
+.stat:last-child{border-right:0}
+.stat .v{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:600;line-height:1}
+@media(max-width:700px){.stat{padding:16px 0 16px 14px}.stat .v{font-size:40px}}
+.bar{display:flex;height:22px;border-radius:6px;overflow:hidden;gap:2px}
+.bar div{min-width:0}
+.dot{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}
+th{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{text-align:right;padding:12px 10px;border-top:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;padding-left:0}
+td.nm{white-space:normal;min-width:150px}
+tr.hl td{color:var(--gold)}
+@media(max-width:700px){th,td{padding-left:6px;padding-right:6px}th:first-child,td:first-child{padding-left:0}}
+tr.tot td{font-weight:600;border-top:2px solid var(--line)}
+.rec{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:14px 0;border-top:1px solid var(--line)}
+.rec:first-of-type{border-top:0;padding-top:0}
+.rec .k{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.rec .d{font-size:14px;color:var(--muted);margin-top:2px}
+.rec .v{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:600;line-height:1;white-space:nowrap}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tab{background:transparent;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer}
+.tab.on{border-color:var(--gold);color:var(--gold)}
+.rows{display:flex;flex-direction:column;gap:14px}
+.rows .t{display:flex;justify-content:space-between;gap:12px;font-size:16px;margin-bottom:6px}
+.rows .t b{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:600}
+.rows .t a{text-decoration:none}
+.rows .t a:hover{color:var(--gold)}
+.track{height:6px;background:#26262A;border-radius:3px}
+.track i{display:block;height:6px;background:var(--gold);border-radius:3px}
+.search{width:100%;min-height:44px;padding:0 14px;border-radius:12px;background:var(--bg);border:1px solid var(--line);font-size:15px;outline:0;margin-bottom:12px}
+.search:focus{border-color:var(--gold)}
+.more{margin-top:12px;width:100%;min-height:48px;background:transparent;border:1px solid var(--line);border-radius:12px;color:var(--gold);font-size:15px;font-weight:600;cursor:pointer}
+.note{font-size:13px;color:var(--muted);margin-top:12px}
+.empty{color:var(--muted);padding:12px 0}
+footer{text-align:center;font-size:13px;color:var(--muted);padding-top:8px}
+#err{padding:40px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div id="err">Loading club stats…</div></div>
+<script src="config.js"></script>
+<script>
+const TEAMS=[["First Team","Firsts"],["Reserve Team","Reserves"],["Sunday Team","Sundays"],["Development Team","Development"],["Old Boys","Old Boys"]];
+const TL=Object.fromEntries(TEAMS);
+const CARET='<svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A39D90" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+const LB=[["a","Appearances"],["g","Goals"],["as","Assists"],["cs","Clean sheets"],["ga","Goals + assists per game"]];
+let D,C,M=[],S={t:"all",s:"all",lb:"a",all:false};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pct=(n,d,dp=0)=>d?(n/d*100).toFixed(dp):"0";
+const fmtDate=iso=>{if(!iso)return"";const d=new Date(iso+"T00:00:00");return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})};
+
+Promise.all([
+  fetch("data.json").then(r=>{if(!r.ok)throw 0;return r.json()}),
+  fetch("club.json").then(r=>{if(!r.ok)throw 0;return r.json()})
+]).then(([d,c])=>{
+  D=d;C=c;
+  M=c.matches.map(a=>({id:a[0],date:a[1],season:a[2],team:a[3],opp:a[4],gf:a[5],ga:a[6],res:a[7],cs:a[8],squad:a[9],mgr:a[10]}));
+  const q=new URLSearchParams(location.search);
+  if(TL[q.get("t")])S.t=q.get("t");
+  if(D.seasons.includes(q.get("s")))S.s=q.get("s");
+  render();
+}).catch(()=>{document.getElementById("err").textContent="Club stats could not be loaded. The club data may not be ready yet."});
+
+const rowsF=(team=S.t,season=S.s)=>M.filter(m=>(team==="all"||m.team===team)&&(season==="all"||m.season===season));
+function sum(rs){const s={p:rs.length,w:0,d:0,l:0,gf:0,ga:0,cs:0};for(const m of rs){s[m.res.toLowerCase()]++;s.gf+=m.gf;s.ga+=m.ga;s.cs+=m.cs}return s}
+function stat(v,l){return `<div class="stat"><div class="v">${v}</div><div class="lab" style="margin-top:6px">${l}</div></div>`}
+
+function bestStreak(rs,test){
+  let best=null;const by={};
+  for(const m of rs)(by[m.team]=by[m.team]||[]).push(m);
+  for(const t in by){
+    const a=by[t].slice().sort((x,y)=>x.date<y.date?-1:x.date>y.date?1:x.id-y.id);
+    let run=[];
+    const close=()=>{if(run.length&&(!best||run.length>=best.n))best={n:run.length,team:t,from:run[0].date,to:run[run.length-1].date};run=[]};
+    for(const m of a){if(test(m))run.push(m);else close()}
+    close();
+  }
+  return best;
+}
+function playerSeasonRecord(field){
+  let max=0,hold=[];
+  for(const [name,blocks] of Object.entries(D.players))for(const s of D.seasons){
+    const b=blocks[s];if(!b)continue;const v=b[field];
+    if(v>max){max=v;hold=[{name,s}]}else if(v===max&&v>0)hold.push({name,s});
+  }
+  return {max,hold};
+}
+function holders(h){
+  const shown=h.hold.slice(0,3).map(x=>`${esc(x.name)} (${x.s})`).join(", ");
+  return shown+(h.hold.length>3?` and ${h.hold.length-3} more`:"");
+}
+function leaderboard(){
+  const key=S.s,minA=key==="all"?20:10,out=[];
+  for(const [name,blocks] of Object.entries(D.players)){
+    const b=blocks[key];if(!b)continue;
+    let v;
+    if(S.lb==="ga"){if(b.a<minA)continue;v=(b.g+b.as)/b.a}else v=b[S.lb];
+    if(v>0)out.push([name,v]);
+  }
+  out.sort((x,y)=>y[1]-x[1]||x[0].localeCompare(y[0]));
+  return {list:out.slice(0,10),minA};
+}
+function oppTable(){
+  const g={};
+  for(const m of rowsF()){const o=g[m.opp]=g[m.opp]||{n:m.opp,p:0,w:0,d:0,l:0,gf:0,ga:0};o.p++;o[m.res.toLowerCase()]++;o.gf+=m.gf;o.ga+=m.ga}
+  return Object.values(g).sort((a,b)=>b.p-a.p||b.w-a.w||a.n.localeCompare(b.n));
+}
+function oppRows(){
+  const q=(document.getElementById("oq")||{value:""}).value.trim().toLowerCase();
+  let all=oppTable();
+  if(q)all=all.filter(o=>o.n.toLowerCase().includes(q));
+  const list=(S.all||q)?all:all.slice(0,15);
+  const rows=list.map(o=>`<tr><td class="nm">${esc(o.n)}</td><td>${o.p}</td><td>${o.w}</td><td>${o.d}</td><td>${o.l}</td><td>${o.gf}-${o.ga}</td></tr>`).join("");
+  document.getElementById("opp-body").innerHTML=rows||`<tr><td colspan="6" class="empty">No opponents match.</td></tr>`;
+  const btn=document.getElementById("opp-more");
+  if(btn){btn.style.display=(!q&&all.length>15)?"block":"none";btn.textContent=S.all?"Show fewer":`Show all ${all.length} opponents`}
+}
+function mgrTable(){
+  const g={};
+  for(const m of rowsF())for(const n of (m.mgr||"").split(",").map(x=>x.trim()).filter(Boolean)){
+    const o=g[n]=g[n]||{n,p:0,w:0,d:0,l:0};o.p++;o[m.res.toLowerCase()]++;
+  }
+  return Object.values(g).sort((a,b)=>b.p-a.p||a.n.localeCompare(b.n));
+}
+function squadTable(){
+  const qual=(b)=>S.t==="all"?b.a>0:(b.t[S.t]||0)>0;
+  const first={};
+  for(const [name,blocks] of Object.entries(D.players))for(const s of D.seasons){const b=blocks[s];if(b&&qual(b)){first[name]=s;break}}
+  return D.seasons.slice().reverse().map(s=>{
+    let used=0,fresh=0;
+    for(const [name,blocks] of Object.entries(D.players)){const b=blocks[s];if(b&&qual(b)){used++;if(first[name]===s)fresh++}}
+    const ms=rowsF(S.t,s);
+    const avg=ms.length?(ms.reduce((x,m)=>x+m.squad,0)/ms.length).toFixed(1):"–";
+    return {s,used,fresh,avg,games:ms.length};
+  }).filter(r=>r.games>0||r.used>0);
+}
+
+function render(){
+  const rs=rowsF(),t=sum(rs);
+  const scopeLabel=`${S.t==="all"?"All teams":TL[S.t]} · ${S.s==="all"?"All time":S.s}`;
+  const seasonRows=D.seasons.slice().reverse().map(s=>({s,...sum(rowsF(S.t,s))})).filter(r=>r.p>0);
+  const allT=sum(rowsF(S.t,"all"));
+  const win=bestWin(rs),goals=mostGoals(rs);
+  const unb=bestStreak(rs,m=>m.res!=="L"),wins=bestStreak(rs,m=>m.res==="W"),cs=bestStreak(rs,m=>m.cs===1);
+  const sRec=[["Most appearances in a season","a"],["Most goals in a season","g"],["Most assists in a season","as"],["Most clean sheets in a season","cs"]].map(([l,f])=>({l,h:playerSeasonRecord(f)}));
+  const lb=leaderboard(),mx=lb.list.length?lb.list[0][1]:1;
+  const mgr=mgrTable(),sq=squadTable();
+  const streakRec=(l,x)=>x?`<div class="rec"><div><div class="k">${l}</div><div class="d">${TL[x.team]||esc(x.team)}, ${fmtDate(x.from)} to ${fmtDate(x.to)}</div></div><div class="v">${x.n} games</div></div>`:"";
+  document.getElementById("app").innerHTML=`
+  <header>
+    <div class="brand"><img src="badge.png" alt="AFC Winkfield badge"><div><div class="lab" style="font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.16em">AFC Winkfield</div><h1>Club Stats</h1></div></div>
+    <div class="pickers">
+      <label class="pick"><span class="lab">Team</span><select id="st" aria-label="Team"><option value="all">All teams</option>${TEAMS.map(([k,l])=>`<option value="${k}"${S.t===k?" selected":""}>${l}</option>`).join("")}</select>${CARET}</label>
+      <label class="pick"><span class="lab">Season</span><select id="ss" aria-label="Season"><option value="all">All time</option>${D.seasons.slice().reverse().map(s=>`<option${S.s===s?" selected":""}>${s}</option>`).join("")}</select>${CARET}</label>
+    </div>
+  </header>
+  <nav class="nav"><a href="index.html">Players</a><a href="club.html" class="on">Club</a><a href="managers.html">Managers</a></nav>
+  <div class="row">
+    <section class="card hero"><div><div class="lab">Matches played</div><div class="big">${t.p}</div><div class="lab" style="margin-top:6px">${esc(scopeLabel)}</div></div>
+      <div><div class="bar"><div style="flex:${t.w} 1 0;background:#F0D08C"></div><div style="flex:${t.d} 1 0;background:#8A8578"></div><div style="flex:${t.l} 1 0;background:#C8383D"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:15px"><span><span class="dot" style="background:#F0D08C"></span>Won ${pct(t.w,t.p)}%</span><span><span class="dot" style="background:#8A8578"></span>Drawn ${pct(t.d,t.p)}%</span><span><span class="dot" style="background:#C8383D"></span>Lost ${pct(t.l,t.p)}%</span></div></div></section>
+    <section class="card stats"><div class="grid3">${stat(t.w,"Won")}${stat(t.d,"Drawn")}${stat(t.l,"Lost")}</div>
+      <div class="grid3">${stat(t.gf,"Goals for")}${stat(t.ga,"Goals against")}${stat(t.cs,"Clean sheets")}</div></section>
+  </div>
+  <div class="row"><section class="card full"><h2>Season by season</h2><div class="sub">${S.t==="all"?"All teams":TL[S.t]}</div>
+    <div class="scroll"><table><thead><tr><th>Season</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Win %</th></tr></thead><tbody>
+    ${seasonRows.map(r=>`<tr class="${S.s===r.s?"hl":""}"><td>${r.s}</td><td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?"+":""}${r.gf-r.ga}</td><td>${pct(r.w,r.p)}%</td></tr>`).join("")}
+    <tr class="tot"><td>All time</td><td>${allT.p}</td><td>${allT.w}</td><td>${allT.d}</td><td>${allT.l}</td><td>${allT.gf}</td><td>${allT.ga}</td><td>${allT.gf-allT.ga>0?"+":""}${allT.gf-allT.ga}</td><td>${pct(allT.w,allT.p)}%</td></tr>
+    </tbody></table></div></section></div>
+  <div class="row">
+    <section class="card"><h2>Club records</h2><div class="sub">${esc(scopeLabel)}</div>
+      ${win?`<div class="rec"><div><div class="k">Biggest win</div><div class="d">${TL[win.team]||esc(win.team)} v ${esc(win.opp)}, ${fmtDate(win.date)}</div></div><div class="v">${win.gf}-${win.ga}</div></div>`:""}
+      ${goals?`<div class="rec"><div><div class="k">Most goals scored in a game</div><div class="d">${TL[goals.team]||esc(goals.team)} v ${esc(goals.opp)}, ${fmtDate(goals.date)}</div></div><div class="v">${goals.gf}-${goals.ga}</div></div>`:""}
+      ${streakRec("Longest unbeaten run",unb)}${streakRec("Longest winning run",wins)}${streakRec("Longest clean sheet run",cs)}
+      ${!win&&!goals&&!unb?'<div class="empty">No matches for this selection.</div>':""}
+    </section>
+    <section class="card"><h2>Single-season player records</h2><div class="sub">All teams, all seasons</div>
+      ${sRec.map(r=>`<div class="rec"><div><div class="k">${r.l}</div><div class="d">${holders(r.h)}</div></div><div class="v">${r.h.max}</div></div>`).join("")}
+    </section>
+  </div>
+  <div class="row"><section class="card full"><h2>Leaderboards</h2><div class="sub">${S.s==="all"?"All time":S.s}, all teams. Tap a name for their page.</div>
+    <div class="tabs">${LB.map(([k,l])=>`<button type="button" class="tab${S.lb===k?" on":""}" data-lb="${k}">${l}</button>`).join("")}</div>
+    ${lb.list.length?`<div class="rows">${lb.list.map(([n,v])=>`<div><div class="t"><a href="index.html?p=${encodeURIComponent(n)}">${esc(n)}</a><b>${S.lb==="ga"?v.toFixed(2):v}</b></div><div class="track"><i style="width:${(v/mx*100).toFixed(1)}%"></i></div></div>`).join("")}</div>`:'<div class="empty">No data for this selection.</div>'}
+    ${S.lb==="ga"?`<div class="note">Players need at least ${lb.minA} appearances to appear here.</div>`:""}
+  </section></div>
+  <div class="row">
+    <section class="card" style="flex:2 1 560px"><h2>Record against opponents</h2><div class="sub">${esc(scopeLabel)}</div>
+      <input id="oq" class="search" type="search" placeholder="Search for a team" aria-label="Search opponents" autocomplete="off">
+      <div class="scroll"><table><thead><tr><th>Opponent</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF-GA</th></tr></thead><tbody id="opp-body"></tbody></table></div>
+      <button type="button" class="more" id="opp-more"></button></section>
+    <section class="card"><h2>Managers</h2><div class="sub">${esc(scopeLabel)}</div>
+      <div class="scroll"><table><thead><tr><th>Manager</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Win %</th></tr></thead><tbody>
+      ${mgr.length?mgr.map(o=>`<tr><td class="nm"><a href="managers.html?m=${encodeURIComponent(o.n)}" style="text-decoration:none">${esc(o.n)}</a></td><td>${o.p}</td><td>${o.w}</td><td>${o.d}</td><td>${o.l}</td><td>${pct(o.w,o.p)}%</td></tr>`).join(""):'<tr><td colspan="6" class="empty">No matches for this selection.</td></tr>'}
+      </tbody></table></div></section>
+  </div>
+  <div class="row"><section class="card full"><h2>Squad depth</h2><div class="sub">${S.t==="all"?"All teams":TL[S.t]}. New players are in their first season for that selection.</div>
+    <div class="scroll"><table><thead><tr><th>Season</th><th>Games</th><th>Players used</th><th>New players</th><th>Avg squad size</th></tr></thead><tbody>
+    ${sq.map(r=>`<tr class="${S.s===r.s?"hl":""}"><td>${r.s}</td><td>${r.games}</td><td>${r.used}</td><td>${r.fresh}</td><td>${r.avg}</td></tr>`).join("")}
+    </tbody></table></div></section></div>
+  <footer>AFC Winkfield FC · Updated ${esc(C.updated||"")}</footer>`;
+
+  document.getElementById("st").addEventListener("change",e=>{S.t=e.target.value;track("club/team/"+S.t,"Club team: "+S.t);go()});
+  document.getElementById("ss").addEventListener("change",e=>{S.s=e.target.value;track("club/season/"+S.s,"Club season: "+S.s);go()});
+  document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{S.lb=b.dataset.lb;track("club/leaderboard/"+S.lb,"Leaderboard: "+S.lb);render()}));
+  document.getElementById("oq").addEventListener("input",oppRows);
+  document.getElementById("opp-more").addEventListener("click",()=>{S.all=!S.all;oppRows()});
+  oppRows();
+}
+function bestWin(rs){let b=null;for(const m of rs){if(m.res!=="W"||m.gf<=m.ga)continue;const d=m.gf-m.ga;if(!b||d>b.d||(d===b.d&&(m.gf>b.gf||(m.gf===b.gf&&m.date>b.date))))b={...m,d}}return b}
+function mostGoals(rs){let b=null;for(const m of rs){if(!b||m.gf>b.gf||(m.gf===b.gf&&(m.gf-m.ga>b.gf-b.ga||(m.gf-m.ga===b.gf-b.ga&&m.date>b.date))))b=m}return b}
+function go(){
+  const q=new URLSearchParams();if(S.t!=="all")q.set("t",S.t);if(S.s!=="all")q.set("s",S.s);
+  history.replaceState(null,"",q.toString()?"?"+q.toString():location.pathname);render();
+}
+</script>
+</body>
+</html>
