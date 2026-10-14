@@ -233,6 +233,18 @@ def club_score(score, result):
     return a, b
 
 
+def venue_of(score, result):
+    """Home score is written first. Wins and losses show the venue; draws and shoot-outs cannot."""
+    m = re.match(r"\s*(\d+)\s*-\s*(\d+)", flat(score))
+    if not m or result not in ("W", "L"):
+        return ""
+    a, b = int(m.group(1)), int(m.group(2))
+    if a == b:
+        return ""
+    ours_first = (a > b) if result == "W" else (a < b)
+    return "H" if ours_first else "A"
+
+
 def build_club(match_rows):
     out, outside, skipped = [], 0, 0
     for r in match_rows:
@@ -246,11 +258,12 @@ def build_club(match_rows):
         d, inside = parse_date(r.get("Match Date"), season)
         outside += not inside
         out.append([int(num(mid)), d, season, team, flat(r.get("Opponent")), sc[0], sc[1], res,
-                    int(num(r.get("Clean Sheet"))), int(num(r.get("Squad Size"))), flat(r.get("Managers"))])
+                    int(num(r.get("Clean Sheet"))), int(num(r.get("Squad Size"))), flat(r.get("Managers")),
+                    venue_of(r.get("Score"), res)])
     out.sort(key=lambda m: (m[1], m[0]))
     print(f"Matches: {len(out)} kept, {skipped} skipped, {outside} dated outside their season (check these in Baserow).")
     return dict(
-        fields=["id", "date", "season", "team", "opp", "gf", "ga", "res", "cs", "squad", "mgr"],
+        fields=["id", "date", "season", "team", "opp", "gf", "ga", "res", "cs", "squad", "mgr", "venue"],
         matches=out, datesOutsideSeason=outside)
 
 
