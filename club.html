@@ -95,16 +95,17 @@ const TEAMS=[["First Team","Firsts"],["Reserve Team","Reserves"],["Sunday Team",
 const TL=Object.fromEntries(TEAMS);
 const CARET='<svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A39D90" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 const LB=[["a","Appearances"],["g","Goals"],["as","Assists"],["cs","Clean sheets"],["ga","Goals + assists per game"]];
-let D,C,M=[],S={t:"all",s:"all",lb:"a",all:false};
+let D,C,TJ=null,M=[],S={t:"all",s:"all",lb:"a",all:false,j:"First Team"};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const pct=(n,d,dp=0)=>d?(n/d*100).toFixed(dp):"0";
 const fmtDate=iso=>{if(!iso)return"";const d=new Date(iso+"T00:00:00");return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})};
 
 Promise.all([
   fetch("data.json").then(r=>{if(!r.ok)throw 0;return r.json()}),
-  fetch("club.json").then(r=>{if(!r.ok)throw 0;return r.json()})
-]).then(([d,c])=>{
-  D=d;C=c;
+  fetch("club.json").then(r=>{if(!r.ok)throw 0;return r.json()}),
+  fetch("teams.json").then(r=>r.ok?r.json():null).catch(()=>null)
+]).then(([d,c,tj])=>{
+  D=d;C=c;TJ=tj;
   M=c.matches.map(a=>({id:a[0],date:a[1],season:a[2],team:a[3],opp:a[4],gf:a[5],ga:a[6],res:a[7],cs:a[8],squad:a[9],mgr:a[10],venue:a[11]||""}));
   const q=new URLSearchParams(location.search);
   if(TL[q.get("t")])S.t=q.get("t");
@@ -186,6 +187,25 @@ function squadTable(){
   }).filter(r=>r.games>0||r.used>0);
 }
 
+function journeyCard(){
+  if(!TJ)return "";
+  const teams=TEAMS.map(([k])=>k).filter(k=>TJ.rows.some(r=>r.team===k&&r.div));
+  if(!teams.length)return "";
+  if(!teams.includes(S.j))S.j=teams[0];
+  const rows=TJ.rows.filter(r=>r.team===S.j&&r.div).sort((a,b)=>a.season<b.season?-1:1);
+  const order=[];rows.forEach(r=>{if(!order.includes(r.div))order.push(r.div)});
+  const lvl=r=>r.level||(order.indexOf(r.div)+1);
+  const levels=[...new Set(rows.map(lvl))].sort((a,b)=>a-b);
+  const H=130+(levels.length-1)*58,Y=r=>H-80-levels.indexOf(lvl(r))*58,n=rows.length,X=i=>n===1?740:310+i*(870/(n-1));
+  let s=`<svg viewBox="0 0 1220 ${H}" width="100%" aria-hidden="true">`;
+  levels.forEach((lv,i)=>{const y=H-80-i*58,names=[...new Set(rows.filter(r=>lvl(r)===lv).map(r=>r.div))].join(" / ");s+=`<line x1="256" y1="${y}" x2="1200" y2="${y}" stroke="#26262A"/><text x="240" y="${y+5}" text-anchor="end" fill="#A39D90" style="font-size:16px;font-weight:600">${esc(names)}</text>`});
+  s+=`<polyline points="${rows.map((r,i)=>X(i).toFixed(0)+","+Y(r)).join(" ")}" fill="none" stroke="#D1A04A" stroke-width="3" stroke-linejoin="round"/>`;
+  rows.forEach((r,i)=>{const cur=!r.pos;s+=`<circle cx="${X(i).toFixed(0)}" cy="${Y(r)}" r="20" fill="${cur?"#0D0D0E":"#17171A"}" stroke="#D1A04A" stroke-width="3"${cur?' stroke-dasharray="4 4"':""}/><text x="${X(i).toFixed(0)}" y="${Y(r)+7}" text-anchor="middle" fill="#F2EEE6" style="font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700">${r.pos||"·"}</text>`;
+    if(r.promoted===true)s+=`<path d="M${X(i)+30} ${Y(r)+4} l9 -16 l9 16z" fill="#F0D08C"/>`;
+    s+=`<text x="${X(i).toFixed(0)}" y="${H-22}" text-anchor="middle" fill="#A39D90" style="font-size:16px;font-weight:600">${r.season}</text>`});
+  s+="</svg>";
+  return `<div class="row"><section class="card full"><h2>League journey</h2><div class="sub">Division each season, with the final position in the circle. A gold arrow marks a promotion.</div><div class="tabs">${teams.map(k=>`<button type="button" class="tab${k===S.j?" on":""}" data-j="${k}">${TL[k]}</button>`).join("")}</div><div class="scroll"><div style="min-width:780px">${s}</div></div></section></div>`;
+}
 function render(){
   const rs=rowsF(),t=sum(rs);
   const scopeLabel=`${S.t==="all"?"All teams":TL[S.t]} · ${S.s==="all"?"All time":S.s}`;
@@ -193,7 +213,8 @@ function render(){
   const allT=sum(rowsF(S.t,"all"));
   const hv=sum(rs.filter(m=>m.venue==="H")),av=sum(rs.filter(m=>m.venue==="A")),uv=rs.filter(m=>!m.venue).length;
   const share=x=>x.w+x.l?pct(x.w,x.w+x.l)+"%":"–";
-  const vbox=(l,x)=>`<div class="vbox"><div class="lab">${l}</div><div class="big" style="font-size:72px">${share(x)}</div><div style="font-size:15px;margin-top:8px">${x.w} won · ${x.l} lost</div><div class="lab" style="margin-top:6px">Goals ${x.gf} for · ${x.ga} against</div></div>`;
+  const gauge=p=>`<svg width="200" height="118" viewBox="0 0 200 118" aria-hidden="true"><path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="#26262A" stroke-width="16" stroke-linecap="round"/><path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="#D1A04A" stroke-width="16" stroke-linecap="round" stroke-dasharray="${(Math.PI*80*p).toFixed(1)} ${(Math.PI*80).toFixed(1)}"/><text x="100" y="94" text-anchor="middle" fill="#F2EEE6" style="font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:700">${Math.round(p*100)}%</text></svg>`;
+  const vbox=(l,x)=>`<div class="vbox" style="text-align:center"><div class="lab">${l}</div>${x.w+x.l?gauge(x.w/(x.w+x.l)):'<div class="big" style="font-size:72px">–</div>'}<div style="font-size:15px">${x.w} won · ${x.l} lost</div><div class="lab" style="margin-top:6px">Goals ${x.gf} for · ${x.ga} against</div></div>`;
   const venueRows=D.seasons.slice().reverse().map(s=>{const r=rowsF(S.t,s);return {s,h:sum(r.filter(m=>m.venue==="H")),a:sum(r.filter(m=>m.venue==="A"))}}).filter(r=>r.h.p+r.a.p>0);
   const win=bestWin(rs),goals=mostGoals(rs);
   const unb=bestStreak(rs,m=>m.res!=="L"),wins=bestStreak(rs,m=>m.res==="W"),cs=bestStreak(rs,m=>m.cs===1);
@@ -222,6 +243,7 @@ function render(){
     ${seasonRows.map(r=>`<tr class="${S.s===r.s?"hl":""}"><td>${r.s}</td><td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?"+":""}${r.gf-r.ga}</td><td>${pct(r.w,r.p)}%</td></tr>`).join("")}
     <tr class="tot"><td>All time</td><td>${allT.p}</td><td>${allT.w}</td><td>${allT.d}</td><td>${allT.l}</td><td>${allT.gf}</td><td>${allT.ga}</td><td>${allT.gf-allT.ga>0?"+":""}${allT.gf-allT.ga}</td><td>${pct(allT.w,allT.p)}%</td></tr>
     </tbody></table></div></section></div>
+  ${journeyCard()}
   <div class="row"><section class="card full"><h2>Home and away</h2><div class="sub">${esc(scopeLabel)}. Share of decided games won.</div>
     <div class="row" style="gap:16px">${vbox("Home",hv)}${vbox("Away",av)}</div>
     <div class="scroll" style="margin-top:20px"><table><thead><tr><th>Season</th><th>Home won</th><th>Home lost</th><th>Away won</th><th>Away lost</th></tr></thead><tbody>
@@ -264,6 +286,7 @@ function render(){
   document.getElementById("st").addEventListener("change",e=>{S.t=e.target.value;track("club/team/"+S.t,"Club team: "+S.t);go()});
   document.getElementById("ss").addEventListener("change",e=>{S.s=e.target.value;track("club/season/"+S.s,"Club season: "+S.s);go()});
   document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{S.lb=b.dataset.lb;track("club/leaderboard/"+S.lb,"Leaderboard: "+S.lb);render()}));
+  document.querySelectorAll("[data-j]").forEach(b=>b.addEventListener("click",()=>{S.j=b.dataset.j;track("club/journey/"+S.j,"League journey: "+S.j);render()}));
   document.getElementById("oq").addEventListener("input",oppRows);
   document.getElementById("opp-more").addEventListener("click",()=>{S.all=!S.all;oppRows()});
   oppRows();

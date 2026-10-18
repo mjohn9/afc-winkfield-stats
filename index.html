@@ -89,13 +89,24 @@ h1{margin:0;font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight
 .empty{color:var(--muted);padding:12px 0}
 footer{text-align:center;font-size:13px;color:var(--muted);padding-top:8px}
 #err{padding:40px;text-align:center;color:var(--muted)}
+.dn{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.dn .legend{margin-top:0;grid-template-columns:1fr;flex:1 1 140px}
+.sharebtn{cursor:pointer;text-align:left;border-color:var(--gold);background:linear-gradient(180deg,#1f1b13,var(--card))}
+.sharebtn:hover{background:#26200f}
+.ov{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.88);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow:auto}
+.ovb{max-width:460px;width:100%;display:flex;flex-direction:column;gap:14px;margin:auto}
+.ovb img{width:100%;border-radius:14px;display:block;box-shadow:0 20px 50px rgba(0,0,0,.7)}
+.ovr{display:flex;gap:10px;flex-wrap:wrap}
+.gbtn{flex:1 1 120px;min-height:48px;border-radius:12px;border:1px solid var(--gold);background:var(--gold);color:#1D1408;font-weight:700;font-size:16px;cursor:pointer;text-align:center;line-height:46px;text-decoration:none;padding:0 14px}
+.gbtn.alt{background:transparent;color:var(--gold)}
+.ovn{font-size:13px;color:var(--muted);text-align:center}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"><div id="err">Loading stats…</div></div>
 <script src="config.js"></script>
 <script>
-const TEAMS=[["First Team","Firsts","#F0D08C",""],["Reserve Team","Reserves","#4A3719","border:1px solid #8F6A2A"],["Sunday Team","Sundays","#8F6A2A",""],["Development Team","Development","#D1A04A",""],["Old Boys","Old Boys","#7A7A7A",""]];
+const TEAMS=[["First Team","Firsts","#F0D08C",""],["Reserve Team","Reserves","#8F6A2A",""],["Sunday Team","Sundays","#D1A04A",""],["Development Team","Development","#B8B2A4",""],["Old Boys","Old Boys","#7A7A7A",""]];
 const CARET='<svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D1A04A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 let D, names, S={p:null,s:"all",c:""};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -139,6 +150,7 @@ function render(){
     <div class="pickers">
       <label class="pick main"><span class="lab">Player (tap to search)</span><input id="pl" list="plist" value="${esc(S.p)}" placeholder="Type a name" autocomplete="off" aria-label="Player">${CARET}<datalist id="plist">${names.map(n=>`<option value="${esc(n)}">`).join("")}</datalist></label>
       <label class="pick small"><span class="lab">Season</span><select id="se" aria-label="Season"><option value="all"${S.s==="all"?" selected":""}>All time</option>${seasons.map(s=>`<option${S.s===s?" selected":""}>${s}</option>`).join("")}</select>${CARET.replace('stroke="#D1A04A"','stroke="#A39D90"')}</label>
+      ${S.p?'<button type="button" class="pick small sharebtn" id="sharebtn"><span class="lab">Share</span><span class="cond" style="font-size:22px;font-weight:600;line-height:1.2">Make my card</span></button>':""}
     </div>
   </header>
   <nav class="nav"><a href="index.html" class="on">Players</a><a href="club.html">Club</a><a href="managers.html">Managers</a><a href="trophies.html">Trophies</a></nav>
@@ -158,8 +170,7 @@ function render(){
         <div><div class="lab"><span class="dot" style="background:#C8383D"></span>Lost</div><div class="v">${pct(b.l,b.a)}%</div><div class="g">${b.l} games</div></div>
       </div></section>
     <section class="card"><h2>Appearances by team</h2>
-      <div class="bar">${teamRows.map(t=>`<div style="flex:${t.n} 1 0;background:${t.c}"></div>`).join("")}</div>
-      <div class="legend">${teamRows.map(t=>`<div><span class="dot" style="background:${t.c};margin:0;flex:none;${t.x}"></span><span class="n">${t.l}</span><b>${pct(t.n,tTotal,1)}%</b></div>`).join("")}</div></section>
+      <div class="dn">${donut(teamRows.map(t=>[t.n,t.c]),170,24,tTotal,"games")}<div class="legend">${teamRows.map(t=>`<div><span class="dot" style="background:${t.c};margin:0;flex:none"></span><span class="n">${t.l}</span><b>${pct(t.n,tTotal,1)}%</b></div>`).join("")}</div></div></section>
     <section class="card"><h2>Head to head</h2>
       <div class="cmp"><div class="me">${esc(S.p)}</div><input id="cp" list="plist" value="${esc(S.c)}" placeholder="Choose player" autocomplete="off" aria-label="Compare with"></div>
       ${cmpRow("Appearances",x=>x.a)}${cmpRow("Goals",x=>x.g)}${cmpRow("Assists",x=>x.as)}${cmpRow("Clean sheets",x=>x.cs)}${cmpRow("Win rate",x=>x.a?x.w/x.a:0,v=>(v*100).toFixed(0)+"%")}</section>
@@ -181,7 +192,97 @@ function render(){
   };
   bind(pl,"p",()=>S.p); if(cp){bind(cp,"c",()=>S.c); cp.addEventListener("input",()=>{if(cp.value===""&&S.c){S.c="";}});}
   document.getElementById("se").addEventListener("change",e=>{S.s=e.target.value;track("season/"+S.s,"Season: "+S.s);go()});
+  const sb=document.getElementById("sharebtn");if(sb)sb.addEventListener("click",shareCard);
 }
+function donut(parts,size,th,big,small){
+  const r=(size-th)/2,cx=size/2,circ=2*Math.PI*r,tot=parts.reduce((a,p)=>a+p[0],0)||1;let off=0,out="";
+  for(const [v,c] of parts){if(v<=0)continue;const L=v/tot*circ;out+=`<circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="${c}" stroke-width="${th}" stroke-dasharray="${Math.max(0,L-2).toFixed(1)} ${(circ-L+2).toFixed(1)}" stroke-dashoffset="${(-off).toFixed(1)}" transform="rotate(-90 ${cx} ${cx})"/>`;off+=L}
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true" style="flex:none"><circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="#26262A" stroke-width="${th}"/>${out}<text x="${cx}" y="${cx+4}" text-anchor="middle" fill="#F2EEE6" style="font-family:'Barlow Condensed',sans-serif;font-size:${Math.round(size*.26)}px;font-weight:700">${big}</text><text x="${cx}" y="${cx+size*.15}" text-anchor="middle" fill="#A39D90" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600">${small}</text></svg>`;
+}
+
+/* ---------- share card ---------- */
+let EXTRA=null;
+async function loadExtra(){
+  if(EXTRA)return EXTRA;
+  const j=u=>fetch(u).then(r=>r.ok?r.json():null).catch(()=>null);
+  const [T,A]=await Promise.all([j("teams.json"),j("awards.json")]);
+  return EXTRA={T,A};
+}
+function cardFacts(){
+  const b=blk(S.p,S.s),{T,A}=EXTRA;let promos=0,titles=0,cups=0;
+  if(T){
+    for(const s of (S.s==="all"?D.seasons:[S.s])){
+      const sb=D.players[S.p]&&D.players[S.p][s];if(!sb)continue;
+      for(const [team,n] of Object.entries(sb.t||{})){
+        if(n<5)continue;const r=T.rows.find(x=>x.season===s&&x.team===team);if(!r)continue;
+        if(r.promoted===true)promos++;if(r.pos===1)titles++;cups+=T.cups.filter(([k])=>r.cups[k]==="Winners").length;
+      }
+    }
+  }
+  const fun=(typeof SHOW_FUN_AWARDS==="undefined")?true:SHOW_FUN_AWARDS;
+  const awards=A?A.rows.filter(r=>r[3]===S.p&&(S.s==="all"||r[0]===S.s)&&(fun||r[2]!=="Cock-up of the Season")).length:0;
+  return {b,promos,titles,cups,awards};
+}
+const rr=(x,a,b,w,h,r)=>{x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()};
+async function drawCard(){
+  await loadExtra();
+  const f=cardFacts(),b=f.b,W=1080,H=1350,cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d");
+  try{await Promise.all([document.fonts.load('700 100px "Barlow Condensed"'),document.fonts.load('600 40px "Barlow"')])}catch(e){}
+  const CF='"Barlow Condensed","Arial Narrow",sans-serif',BF='"Barlow",Arial,sans-serif';
+  const txt=(t,px,py,font,color,al="left")=>{x.font=font;x.fillStyle=color;x.textAlign=al;x.fillText(t,px,py)};
+  x.fillStyle="#0D0D0E";x.fillRect(0,0,W,H);
+  let g=x.createRadialGradient(W/2,0,40,W/2,0,950);g.addColorStop(0,"rgba(209,160,74,.30)");g.addColorStop(1,"rgba(209,160,74,0)");x.fillStyle=g;x.fillRect(0,0,W,H);
+  rr(x,28,28,W-56,H-56,34);x.strokeStyle="#D1A04A";x.lineWidth=3;x.stroke();
+  const img=await new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src="badge.png"});
+  if(img)x.drawImage(img,72,66,img.width/img.height*150,150);
+  txt("AFC WINKFIELD",268,118,`600 32px ${BF}`,"#A39D90");txt("PLAYER CARD",268,184,`700 66px ${CF}`,"#F2EEE6");
+  x.fillStyle="rgba(209,160,74,.45)";x.fillRect(72,248,W-144,2);
+  let fs=170;x.font=`700 ${fs}px ${CF}`;const nm=S.p.toUpperCase();while(x.measureText(nm).width>W-160&&fs>60){fs-=4;x.font=`700 ${fs}px ${CF}`}
+  txt(nm,80,258+fs*.92,`700 ${fs}px ${CF}`,"#F2EEE6");
+  const scope=S.s==="all"?"ALL TIME":"SEASON "+S.s;txt(scope,84,258+fs*.92+56,`600 46px ${CF}`,"#D1A04A");
+  const ty=470;
+  txt(String(b.a),76,ty+210,`700 270px ${CF}`,"#D1A04A");txt("APPEARANCES",84,ty+262,`600 30px ${BF}`,"#A39D90");
+  if(b.rk)txt(ord(b.rk)+(S.s==="all"?" all-time":" this season"),84,ty+322,`600 46px ${CF}`,"#F2EEE6");
+  const cx=800,cy=ty+170,R=128,T2=36,tot=b.a||1;let a0=-Math.PI/2;
+  x.lineWidth=T2;x.strokeStyle="#26262A";x.beginPath();x.arc(cx,cy,R,0,Math.PI*2);x.stroke();
+  for(const [v,c] of [[b.w,"#F0D08C"],[b.d,"#8A8578"],[b.l,"#C8383D"]]){if(!v)continue;const a1=a0+v/tot*Math.PI*2;x.strokeStyle=c;x.beginPath();x.arc(cx,cy,R,a0+.012,a1-.012);x.stroke();a0=a1}
+  txt(Math.round(b.w/tot*100)+"%",cx,cy+22,`700 78px ${CF}`,"#F2EEE6","center");txt("WON",cx,cy+58,`600 26px ${BF}`,"#A39D90","center");
+  txt(`W ${b.w}  ·  D ${b.d}  ·  L ${b.l}`,cx,cy+R+62,`600 28px ${BF}`,"#A39D90","center");
+  const sy=ty+420;x.fillStyle="rgba(255,255,255,.12)";x.fillRect(386,sy-20,2,150);x.fillRect(692,sy-20,2,150);
+  [[b.g,"GOALS",80],[b.as,"ASSISTS",412],[b.cs,"CLEAN SHEETS",718]].forEach(([v,l,px])=>{txt(String(v),px,sy+84,`700 112px ${CF}`,"#F2EEE6");txt(l,px+4,sy+126,`600 28px ${BF}`,"#A39D90")});
+  const by=sy+190;txt("APPEARANCES BY TEAM",80,by,`600 26px ${BF}`,"#A39D90");
+  const parts=TEAMS.map(([k,l,c])=>({l,c,n:(b.t||{})[k]||0})).filter(p=>p.n>0),bt=parts.reduce((a,p)=>a+p.n,0)||1;let bx=80;
+  rr(x,80,by+16,920,26,13);x.save();x.clip();for(const p of parts){const w=p.n/bt*920;x.fillStyle=p.c;x.fillRect(bx,by+16,w,26);bx+=w}x.restore();
+  let lx=80;for(const p of parts){x.fillStyle=p.c;x.fillRect(lx,by+66,22,22);x.font=`600 28px ${BF}`;const t=`${p.l} ${p.n}`;txt(t,lx+32,by+86,`600 28px ${BF}`,"#F2EEE6");lx+=32+x.measureText(t).width+34}
+  const chips=[];if(f.awards)chips.push(f.awards+(f.awards===1?" award":" awards"));if(f.promos)chips.push(f.promos+(f.promos===1?" promotion":" promotions"));if(f.titles)chips.push(f.titles+(f.titles===1?" league title":" league titles"));if(f.cups)chips.push(f.cups+(f.cups===1?" cup win":" cup wins"));
+  let cx2=80;const cyy=by+118;
+  for(const t of chips.slice(0,4)){x.font=`600 28px ${BF}`;const w=x.measureText(t).width+44;if(cx2+w>1000)break;rr(x,cx2,cyy,w,52,26);x.fillStyle="rgba(209,160,74,.14)";x.fill();x.strokeStyle="#D1A04A";x.lineWidth=2;x.stroke();txt(t,cx2+22,cyy+36,`600 28px ${BF}`,"#F0D08C");cx2+=w+14}
+  const url=(location.host+location.pathname).replace(/\/[^\/]*$/,"/").replace(/^\//,"");
+  txt(url,W/2,H-52,`500 26px ${BF}`,"#A39D90","center");
+  return cv;
+}
+async function shareCard(){
+  const btn=document.getElementById("sharebtn"),old=btn.innerHTML;btn.innerHTML='<span class="lab">Share</span><span class="cond" style="font-size:22px;font-weight:600;line-height:1.2">Making card…</span>';
+  try{
+    track("share/"+S.p,"Share card: "+S.p);
+    const cv=await drawCard();
+    const blob=await new Promise(r=>cv.toBlob(r,"image/png"));
+    showCard(blob);
+  }catch(e){alert("Sorry, the card could not be made on this device.")}
+  btn.innerHTML=old;
+}
+function showCard(blob){
+  const url=URL.createObjectURL(blob),nm=(S.p+"-"+(S.s==="all"?"all-time":S.s.replace("/","-"))).replace(/[^a-z0-9-]+/gi,"-")+".png";
+  const file=new File([blob],nm,{type:"image/png"}),can=navigator.canShare&&navigator.canShare({files:[file]});
+  const o=document.createElement("div");o.className="ov";
+  o.innerHTML=`<div class="ovb"><img src="${url}" alt="Stats card for ${esc(S.p)}"><div class="ovr">${can?'<button type="button" class="gbtn" id="ov-share">Share</button>':""}<a class="gbtn alt" download="${nm}" href="${url}">Save image</a><button type="button" class="gbtn alt" id="ov-close">Close</button></div>${can?"":'<div class="ovn">On a phone, press and hold the picture to save it, or use Save image.</div>'}</div>`;
+  document.body.appendChild(o);
+  const close=()=>{o.remove();URL.revokeObjectURL(url);document.removeEventListener("keydown",esc2)};
+  const esc2=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc2);
+  o.querySelector("#ov-close").addEventListener("click",close);o.addEventListener("click",e=>{if(e.target===o)close()});
+  const sh=o.querySelector("#ov-share");if(sh)sh.addEventListener("click",async()=>{try{await navigator.share({files:[file],title:S.p+" · AFC Winkfield",text:"My AFC Winkfield stats"})}catch(e){}});
+}
+
 function go(){
   const q=new URLSearchParams();q.set("p",S.p);if(S.s!=="all")q.set("s",S.s);if(S.c)q.set("c",S.c);
   history.replaceState(null,"","?"+q.toString());render();

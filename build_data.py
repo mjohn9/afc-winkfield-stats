@@ -338,7 +338,8 @@ def build_teams(rows):
         cups = {k: clean_round(getf(r, col)) for k, _, col in CUPS}
         if pos in (2, 3) and promoted is not True:
             warn.append(f"{team} {season} finished {pos} but is not marked as promoted.")
-        out.append(dict(season=season, team=team, pos=pos, div=div, promoted=promoted, cups=cups))
+        level = int(num(getf(r, "Level"))) or None  # optional: 1 = lowest division for that team
+        out.append(dict(season=season, team=team, pos=pos, div=div, promoted=promoted, cups=cups, level=level))
     out.sort(key=lambda x: (x["season"], TEAM_ORDER.index(x["team"]) if x["team"] in TEAM_ORDER else 9))
     for w in warn:
         print("Check:", w)
