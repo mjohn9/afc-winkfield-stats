@@ -13,6 +13,10 @@ Optional third table for the club page (writes club.json):
   TABLE_MATCHES (Baserow)  or  SHEET_MATCHES_URL (Google Sheet CSV link)
   Fields: Match ID, Match Date, Opponent, Score, Teams, Season, Managers, Result, Clean Sheet, Squad Size
 
+Optional tables for the trophy room page (write teams.json and awards.json):
+  TABLE_TEAMS   Teams table: Team Name, Seasons, Final Position, Promotion, Division and the cup columns
+  TABLE_AWARDS  Award Winners table: Awards, Seasons, Name
+
 Test mode reads the Excel workbook instead:  python build_data.py --xlsx stats.xlsx
 
 Fields used
@@ -285,6 +289,87 @@ def build_managers(app_rows):
     return dict(fields=["manager", "player", "season", "team", "a", "w", "d", "l", "cs"], rows=rows)
 
 
+
+# ---------- trophy room data ----------
+# Cup columns in the Teams table, left to right: key, name shown on the site, column name in Baserow.
+# Your "League Cup" column holds the Senior Cup and "League FA Cup" holds the League Cup.
+CUPS = [("senior", "Senior Cup", "League Cup"), ("county", "County Cup", "County Cup"),
+        ("league", "League Cup", "League FA Cup"), ("supp", "Supplementary Cup", "Supplementary Cup")]
+TEAM_ORDER = ["First Team", "Reserve Team", "Sunday Team", "Development Team", "Old Boys"]
+ROUND_WORDS = {"semi final": "Semi-final", "semi-final": "Semi-final", "semifinal": "Semi-final",
+               "quarter final": "Quarter-final", "quarter-final": "Quarter-final", "quarterfinal": "Quarter-final",
+               "winners": "Winners", "winner": "Winners", "final": "Final", "runner up": "Final", "runners up": "Final"}
+
+
+def getf(r, name):
+    if name in r:
+        return r[name]
+    low = {str(k).lower().strip(): v for k, v in r.items()}
+    return low.get(name.lower())
+
+
+def clean_round(v):
+    t = re.sub(r"\s+", " ", flat(v)).strip()
+    if t.lower() in ("", "no competition", "none", "n/a", "-"):
+        return ""
+    if t.lower() in ROUND_WORDS:
+        return ROUND_WORDS[t.lower()]
+    m = re.match(r"^(\d+)(?:st|nd|rd|th)?\s*round$", t, re.I)
+    if m:
+        n = int(m.group(1))
+        suf = "th" if 10 <= n % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+        return f"{n}{suf} Round"
+    return t
+
+
+def build_teams(rows):
+    out, warn, nodiv = [], [], 0
+    if rows and getf(rows[0], "Promotion") is None:
+        warn.append("The Teams table has no Promotion column, so no promotions will show.")
+    for r in rows:
+        team, season = flat(getf(r, "Team Name")), flat(getf(r, "Seasons"))
+        if not team or not season:
+            continue
+        pos = int(num(getf(r, "Final Position"))) or None
+        raw = flat(getf(r, "Promotion")).strip().lower()
+        promoted = True if raw in ("yes", "true", "1", "y", "promoted") else False if raw in ("no", "false", "0", "n") else None
+        div = flat(getf(r, "Division"))
+        nodiv += not div
+        cups = {k: clean_round(getf(r, col)) for k, _, col in CUPS}
+        if pos in (2, 3) and promoted is not True:
+            warn.append(f"{team} {season} finished {pos} but is not marked as promoted.")
+        out.append(dict(season=season, team=team, pos=pos, div=div, promoted=promoted, cups=cups))
+    out.sort(key=lambda x: (x["season"], TEAM_ORDER.index(x["team"]) if x["team"] in TEAM_ORDER else 9))
+    for w in warn:
+        print("Check:", w)
+    print(f"Teams: {len(out)} team-seasons, {nodiv} without a Division.")
+    return dict(cups=[[k, n] for k, n, _ in CUPS], rows=out)
+
+
+AWARD_PREFIX = {"1st": "First Team", "Res": "Reserve Team", "Dev": "Development Team", "Sun": "Sunday Team"}
+
+
+def build_awards(rows):
+    out = []
+    for r in rows:
+        a = flat(getf(r, "Awards")).strip().rstrip(":").strip()
+        season, name = flat(getf(r, "Seasons")), flat(getf(r, "Name"))
+        if not (a and season and name):
+            continue
+        first, _, rest = a.partition(" ")
+        team, cat = (AWARD_PREFIX[first], rest) if first in AWARD_PREFIX and rest else ("Club", a)
+        out.append([season, team, cat, name])
+    out.sort(key=lambda x: (x[0], x[1], x[2], x[3]))
+    print(f"Awards: {len(out)} awards.")
+    return dict(rows=out)
+
+
+def load_local_csv(path):
+    import csv
+    with open(path, encoding="utf-8-sig", newline="") as f:
+        return list(csv.DictReader(f))
+
+
 def write_json(path, data, label):
     if os.path.exists(path):
         try:
@@ -335,6 +420,26 @@ def main():
         write_json(os.path.join(os.path.dirname(OUT), "club.json"), club, "club.json")
     else:
         print("No Matches table set (TABLE_MATCHES), so club.json was not updated.")
+
+    # trophy room tables (optional)
+    out_dir = os.path.dirname(OUT)
+    api = os.environ.get("BASEROW_API", "https://api.baserow.io").rstrip("/")
+    token = os.environ.get("BASEROW_TOKEN")
+    trows = arows = None
+    if "--teams-csv" in sys.argv:
+        trows = load_local_csv(sys.argv[sys.argv.index("--teams-csv") + 1])
+    elif os.environ.get("TABLE_TEAMS") and token:
+        trows = fetch_table(api, token, os.environ["TABLE_TEAMS"])
+    if "--awards-csv" in sys.argv:
+        arows = load_local_csv(sys.argv[sys.argv.index("--awards-csv") + 1])
+    elif os.environ.get("TABLE_AWARDS") and token:
+        arows = fetch_table(api, token, os.environ["TABLE_AWARDS"])
+    if trows is not None:
+        check_fields(trows, ["Team Name", "Seasons", "Final Position"], "Teams")
+        write_json(os.path.join(out_dir, "teams.json"), build_teams(trows), "teams.json")
+    if arows is not None:
+        check_fields(arows, ["Awards", "Seasons", "Name"], "Award Winners")
+        write_json(os.path.join(out_dir, "awards.json"), build_awards(arows), "awards.json")
 
 
 if __name__ == "__main__":

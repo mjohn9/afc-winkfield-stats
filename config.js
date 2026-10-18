@@ -7,3 +7,6 @@ function track(path,title){
   const send=()=>{if(window.goatcounter&&window.goatcounter.count){window.goatcounter.count({path,title,event:true});return true}return false};
   if(!send())setTimeout(send,1500);
 }
+
+// Set to false to hide the "Cock-up of the Season" awards from the trophy room.
+const SHOW_FUN_AWARDS=true;

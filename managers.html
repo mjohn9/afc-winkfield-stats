@@ -208,7 +208,7 @@ function render(){
       <label class="pick"><span class="lab">Season</span><select id="ss" aria-label="Season"><option value="all">All time</option>${SEASONS.slice().reverse().map(s=>`<option${S.s===s?" selected":""}>${s}</option>`).join("")}</select>${CARET}</label>
     </div>
   </header>
-  <nav class="nav"><a href="index.html">Players</a><a href="club.html">Club</a><a href="managers.html" class="on">Managers</a></nav>
+  <nav class="nav"><a href="index.html">Players</a><a href="club.html">Club</a><a href="managers.html" class="on">Managers</a><a href="trophies.html">Trophies</a></nav>
   ${S.m?detail():overview()}
   <footer>AFC Winkfield FC · Updated ${esc(C.updated||"")}</footer>`;
   document.getElementById("sm").addEventListener("change",e=>{S.m=e.target.value;if(S.m)track("manager/"+S.m,"Manager: "+S.m);go()});

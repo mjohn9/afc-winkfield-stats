@@ -141,7 +141,7 @@ function render(){
       <label class="pick small"><span class="lab">Season</span><select id="se" aria-label="Season"><option value="all"${S.s==="all"?" selected":""}>All time</option>${seasons.map(s=>`<option${S.s===s?" selected":""}>${s}</option>`).join("")}</select>${CARET.replace('stroke="#D1A04A"','stroke="#A39D90"')}</label>
     </div>
   </header>
-  <nav class="nav"><a href="index.html" class="on">Players</a><a href="club.html">Club</a><a href="managers.html">Managers</a></nav>
+  <nav class="nav"><a href="index.html" class="on">Players</a><a href="club.html">Club</a><a href="managers.html">Managers</a><a href="trophies.html">Trophies</a></nav>
   ${!S.p?'<div class="card empty" style="flex:none;text-align:center;padding:48px 24px;font-size:18px">Search for a player above to see their stats.</div>':`${b.a?"":`<div class="card empty">${esc(S.p)} has no appearances in ${esc(seasonLabel)}.</div>`}
   <div class="row">
     <section class="card hero"><div><div class="lab">Total appearances</div><div class="big">${b.a}</div></div>
