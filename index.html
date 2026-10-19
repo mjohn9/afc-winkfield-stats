@@ -150,7 +150,6 @@ function render(){
     <div class="pickers">
       <label class="pick main"><span class="lab">Player (tap to search)</span><input id="pl" list="plist" value="${esc(S.p)}" placeholder="Type a name" autocomplete="off" aria-label="Player">${CARET}<datalist id="plist">${names.map(n=>`<option value="${esc(n)}">`).join("")}</datalist></label>
       <label class="pick small"><span class="lab">Season</span><select id="se" aria-label="Season"><option value="all"${S.s==="all"?" selected":""}>All time</option>${seasons.map(s=>`<option${S.s===s?" selected":""}>${s}</option>`).join("")}</select>${CARET.replace('stroke="#D1A04A"','stroke="#A39D90"')}</label>
-      ${S.p?'<button type="button" class="pick small sharebtn" id="sharebtn"><span class="lab">Share</span><span class="cond" style="font-size:22px;font-weight:600;line-height:1.2">Make my card</span></button>':""}
     </div>
   </header>
   <nav class="nav"><a href="index.html" class="on">Players</a><a href="club.html">Club</a><a href="managers.html">Managers</a><a href="trophies.html">Trophies</a></nav>
@@ -182,6 +181,8 @@ function render(){
       ${b.op.length?b.op.map(([n,v],i)=>`<div class="opp"><span class="r">${i+1}</span><span class="nm">${esc(n)}</span><b>${v}</b></div>`).join(""):'<div class="empty">No data for this selection.</div>'}</section>
   </div>
   `}
+  ${S.p?`<section class="card" style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap"><div><h2 style="margin-bottom:4px">Share your stats</h2><div class="sub" style="margin:0">Make a picture of these stats for WhatsApp, Instagram or Facebook.</div></div><button type="button" class="gbtn" id="sharebtn" style="flex:0 0 auto;min-width:220px">Make my card</button></section>`:""}
+  ${socialLinks()}
   <footer>AFC Winkfield FC · Updated ${esc(D.updated||"")}${GC_CODE?"<br>Visits and player searches are counted anonymously. No cookies.":""}</footer>`;
 
   const pl=document.getElementById("pl"), cp=document.getElementById("cp");
@@ -257,19 +258,17 @@ async function drawCard(){
   const chips=[];if(f.awards)chips.push(f.awards+(f.awards===1?" award":" awards"));if(f.promos)chips.push(f.promos+(f.promos===1?" promotion":" promotions"));if(f.titles)chips.push(f.titles+(f.titles===1?" league title":" league titles"));if(f.cups)chips.push(f.cups+(f.cups===1?" cup win":" cup wins"));
   let cx2=80;const cyy=by+118;
   for(const t of chips.slice(0,4)){x.font=`600 28px ${BF}`;const w=x.measureText(t).width+44;if(cx2+w>1000)break;rr(x,cx2,cyy,w,52,26);x.fillStyle="rgba(209,160,74,.14)";x.fill();x.strokeStyle="#D1A04A";x.lineWidth=2;x.stroke();txt(t,cx2+22,cyy+36,`600 28px ${BF}`,"#F0D08C");cx2+=w+14}
-  const url=(location.host+location.pathname).replace(/\/[^\/]*$/,"/").replace(/^\//,"");
-  txt(url,W/2,H-52,`500 26px ${BF}`,"#A39D90","center");
   return cv;
 }
 async function shareCard(){
-  const btn=document.getElementById("sharebtn"),old=btn.innerHTML;btn.innerHTML='<span class="lab">Share</span><span class="cond" style="font-size:22px;font-weight:600;line-height:1.2">Making card…</span>';
+  const btn=document.getElementById("sharebtn"),old=btn.textContent;btn.textContent="Making card…";
   try{
     track("share/"+S.p,"Share card: "+S.p);
     const cv=await drawCard();
     const blob=await new Promise(r=>cv.toBlob(r,"image/png"));
     showCard(blob);
   }catch(e){alert("Sorry, the card could not be made on this device.")}
-  btn.innerHTML=old;
+  btn.textContent=old;
 }
 function showCard(blob){
   const url=URL.createObjectURL(blob),nm=(S.p+"-"+(S.s==="all"?"all-time":S.s.replace("/","-"))).replace(/[^a-z0-9-]+/gi,"-")+".png";
