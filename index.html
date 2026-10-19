@@ -258,6 +258,8 @@ async function drawCard(){
   const chips=[];if(f.awards)chips.push(f.awards+(f.awards===1?" award":" awards"));if(f.promos)chips.push(f.promos+(f.promos===1?" promotion":" promotions"));if(f.titles)chips.push(f.titles+(f.titles===1?" league title":" league titles"));if(f.cups)chips.push(f.cups+(f.cups===1?" cup win":" cup wins"));
   let cx2=80;const cyy=by+118;
   for(const t of chips.slice(0,4)){x.font=`600 28px ${BF}`;const w=x.measureText(t).width+44;if(cx2+w>1000)break;rr(x,cx2,cyy,w,52,26);x.fillStyle="rgba(209,160,74,.14)";x.fill();x.strokeStyle="#D1A04A";x.lineWidth=2;x.stroke();txt(t,cx2+22,cyy+36,`600 28px ${BF}`,"#F0D08C");cx2+=w+14}
+  const url=(location.host+location.pathname).replace(/\/[^\/]*$/,"/").replace(/^\//,"");
+  txt(url,W/2,H-52,`500 26px ${BF}`,"#A39D90","center");
   return cv;
 }
 async function shareCard(){

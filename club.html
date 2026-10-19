@@ -189,10 +189,9 @@ function squadTable(){
 
 function journeyCard(){
   if(!TJ)return "";
-  const teams=TEAMS.map(([k])=>k).filter(k=>TJ.rows.some(r=>r.team===k&&r.div));
-  if(!teams.length)return "";
-  if(!teams.includes(S.j))S.j=teams[0];
-  const rows=TJ.rows.filter(r=>r.team===S.j&&r.div).sort((a,b)=>a.season<b.season?-1:1);
+  if(S.t==="all"||S.s!=="all")return "";
+  const rows=TJ.rows.filter(r=>r.team===S.t&&r.div).sort((a,b)=>a.season<b.season?-1:1);
+  if(!rows.length)return "";
   const order=[];rows.forEach(r=>{if(!order.includes(r.div))order.push(r.div)});
   const lvl=r=>r.level||(order.indexOf(r.div)+1);
   const levels=[...new Set(rows.map(lvl))].sort((a,b)=>a-b);
@@ -204,7 +203,7 @@ function journeyCard(){
     if(r.promoted===true)s+=`<path d="M${X(i)+30} ${Y(r)+4} l9 -16 l9 16z" fill="#F0D08C"/>`;
     s+=`<text x="${X(i).toFixed(0)}" y="${H-22}" text-anchor="middle" fill="#A39D90" style="font-size:16px;font-weight:600">${r.season}</text>`});
   s+="</svg>";
-  return `<div class="row"><section class="card full"><h2>League journey</h2><div class="sub">Division each season, with the final position in the circle. A gold arrow marks a promotion.</div><div class="tabs">${teams.map(k=>`<button type="button" class="tab${k===S.j?" on":""}" data-j="${k}">${TL[k]}</button>`).join("")}</div><div class="scroll"><div style="min-width:780px">${s}</div></div></section></div>`;
+  return `<div class="row"><section class="card full"><h2>League journey · ${TL[S.t]}</h2><div class="sub">Division each season, with the final position in the circle. A gold arrow marks a promotion.</div><div class="scroll"><div style="min-width:780px">${s}</div></div></section></div>`;
 }
 function render(){
   const rs=rowsF(),t=sum(rs);
@@ -281,12 +280,12 @@ function render(){
     <div class="scroll"><table><thead><tr><th>Season</th><th>Games</th><th>Players used</th><th>New players</th><th>Avg squad size</th></tr></thead><tbody>
     ${sq.map(r=>`<tr class="${S.s===r.s?"hl":""}"><td>${r.s}</td><td>${r.games}</td><td>${r.used}</td><td>${r.fresh}</td><td>${r.avg}</td></tr>`).join("")}
     </tbody></table></div></section></div>
+  ${socialLinks()}
   <footer>AFC Winkfield FC · Updated ${esc(C.updated||"")}</footer>`;
 
   document.getElementById("st").addEventListener("change",e=>{S.t=e.target.value;track("club/team/"+S.t,"Club team: "+S.t);go()});
   document.getElementById("ss").addEventListener("change",e=>{S.s=e.target.value;track("club/season/"+S.s,"Club season: "+S.s);go()});
   document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{S.lb=b.dataset.lb;track("club/leaderboard/"+S.lb,"Leaderboard: "+S.lb);render()}));
-  document.querySelectorAll("[data-j]").forEach(b=>b.addEventListener("click",()=>{S.j=b.dataset.j;track("club/journey/"+S.j,"League journey: "+S.j);render()}));
   document.getElementById("oq").addEventListener("input",oppRows);
   document.getElementById("opp-more").addEventListener("click",()=>{S.all=!S.all;oppRows()});
   oppRows();
