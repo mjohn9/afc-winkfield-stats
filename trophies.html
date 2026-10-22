@@ -162,18 +162,27 @@ function render(){
   let html=`<header><div class="brand"><img src="badge.png" alt="AFC Winkfield badge"><div><div class="lab" style="font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.16em">AFC Winkfield</div><h1>Trophy Room</h1></div></div>
   ${T?`<label class="pick"><span class="lab">Team</span><select id="st" aria-label="Team"><option value="all">All teams</option>${[...new Set(T.rows.map(r=>r.team))].sort((a,b)=>tidx(a)-tidx(b)).map(t=>`<option value="${esc(t)}"${S.team===t?" selected":""}>${TL[t]||esc(t)}</option>`).join("")}</select>${CARET}</label>`:""}</header>
   <nav class="nav"><a href="index.html">Players</a><a href="club.html">Club</a><a href="managers.html">Managers</a><a href="trophies.html" class="on">Trophies</a></nav>`;
-  if(T){
+  const noSeason=!!(T&&S.team!=="all"&&T.rows.filter(r=>r.team===S.team).every(r=>!r.pos));
+  if(noSeason){
+    const nm=TL[S.team]||esc(S.team);
+    html+=`<section class="c banner"><div><div class="big" style="font-size:30px">${nm} haven't completed a season yet</div><div class="lab" style="margin-top:8px;text-transform:none;letter-spacing:.02em;font-size:14px">There are no honours or awards to show for them yet. Below are the club awards from previous seasons.</div></div></section>`;
+    const club=A?A.rows.filter(r=>r[1]==="Club"):[],cs=[...new Set(club.map(r=>r[0]))].sort().reverse();
+    if(cs.length)html+=`<section><h2 class="h2">Club awards</h2><p class="sub">Awards for the whole club, from every season recorded.</p>${cabinet("Club awards",cs.map(s=>shelf(s,club.filter(r=>r[0]===s).map(r=>item("shield",esc(r[3]),esc(r[2].replace(" of the Season","")),"")),0)))}</section>`;
+  }
+  if(T&&!noSeason){
     const H=honours();
-    html+=`<section><h2 class="h2">Team honours</h2><p class="sub">Every trophy, promotion and cup final, newest first.</p>${cabinet("Team honours",[shelf("Trophies",H.trophies),shelf("Promotions",H.promotions),shelf("Runners-up and finalists",H.silver)])}</section>`;
+    const tlab=S.team==="all"?"":(TL[S.team]||esc(S.team));
+    const honShelves=S.team==="all"?[shelf("Trophies",H.trophies),shelf("Promotions",H.promotions),shelf("Runners-up and finalists",H.silver)]:[["Trophies",H.trophies],["Promotions",H.promotions],["Runners-up and finalists",H.silver]].filter(([,i])=>i.length).map(([l,i])=>shelf(l,i,0));
+    html+=`<section><h2 class="h2">Team honours</h2><p class="sub">Every trophy, promotion and cup final, newest first.</p>${honShelves.length?cabinet("Team honours",honShelves):`<div class="c"><p class="sub" style="margin:0">${tlab} have no honours to show yet.</p></div>`}</section>`;
     const runs=promoRuns().filter(r=>S.team==="all"||r.team===S.team);
     for(const r of runs.slice(0,3)){html+=`<section class="c banner"><svg width="64" height="72" viewBox="0 0 64 72" aria-hidden="true"><use href="#medal"/></svg><div><div class="big">${NUM[r.n]||r.n} promotions in a row</div><div class="lab" style="margin-top:6px">${TL[r.team]||esc(r.team)} · ${r.from} to ${r.to}</div></div></section>`}
     if(S.team!=="all"){
     const board=T.rows.filter(r=>(S.team==="all"||r.team===S.team)&&(r.pos||r.promoted===true||T.cups.some(([k])=>r.cups[k]))).slice().sort((a,b)=>a.season<b.season?1:a.season>b.season?-1:tidx(a.team)-tidx(b.team));
-    html+=`<section class="c"><h2 class="h2">Season by season · ${TL[S.team]||esc(S.team)}</h2><p class="sub">League finish and how far the team went in each cup.</p><div class="scroll"><table><thead><tr><th>Season</th><th>League</th>${T.cups.map(([,n])=>`<th>${esc(n)}</th>`).join("")}</tr></thead><tbody>
+    if(board.length)html+=`<section class="c"><h2 class="h2">Season by season · ${TL[S.team]||esc(S.team)}</h2><p class="sub">League finish and how far the team went in each cup.</p><div class="scroll"><table><thead><tr><th>Season</th><th>League</th>${T.cups.map(([,n])=>`<th>${esc(n)}</th>`).join("")}</tr></thead><tbody>
     ${board.map(r=>`<tr><td>${r.season}</td><td>${r.pos?`${ord(r.pos)}${r.div?` <span class="dim">· ${esc(r.div)}</span>`:""}`:'<span class="dim">–</span>'}${r.promoted===true?'<span class="badge">Promoted</span>':""}</td>${T.cups.map(([k])=>`<td>${cupCell(r.cups[k])}</td>`).join("")}</tr>`).join("")}</tbody></table></div></section>`;
     }
   }
-  if(A){
+  if(A&&!noSeason){
     const pool=A.rows.filter(r=>(showFun||r[2]!==FUN)&&(S.team==="all"||r[1]===S.team));
     const tl=S.team==="all"?"":(TL[S.team]||esc(S.team));
     if(!pool.length){
@@ -195,7 +204,7 @@ function render(){
       }else{
         const order=[...CATS,...ar.map(r=>r[2]).filter(c=>!CATS.includes(c))];
         const its=[...new Set(order)].map(c=>find(S.team,c)).filter(Boolean).map(r=>item(AWICON[r[2]]||"shield",esc(r[3]),esc(r[2].replace(" of the Season","")),""));
-        sh.push(shelf("Winners",its,4));
+        sh.push(shelf("Winners",its,0));
       }
       html+=`<section><h2 class="h2">Player awards</h2><p class="sub">${S.team==="all"?"Winners for the chosen season.":"Winners from "+tl+" for the chosen season."}</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">${seasons.map(s=>`<button type="button" class="chip${s===S.season?" on":""}" data-s="${s}">${s}</button>`).join("")}</div>${cabinet((S.team==="all"?"Player awards":tl+" awards")+" · "+S.season,sh)}</section>`;
       const cats=[...new Set([...CATS.filter(c=>showFun||c!==FUN),...ar.filter(r=>r[1]!=="Club").map(r=>r[2])])];
