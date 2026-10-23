@@ -15,7 +15,7 @@ Optional third table for the club page (writes club.json):
 
 Optional tables for the trophy room page (write teams.json and awards.json):
   TABLE_TEAMS   Teams table: Team Name, Seasons, Final Position, Promotion, Division and the cup columns
-  TABLE_AWARDS  Award Winners table: Awards, Seasons, Name
+  TABLE_AWARDS  Award Winners table: Awards, Seasons, Name, Team (a link to the Teams table row for that season)
 
 Test mode reads the Excel workbook instead:  python build_data.py --xlsx stats.xlsx
 
@@ -296,6 +296,7 @@ def build_managers(app_rows):
 CUPS = [("senior", "Senior Cup", "League Cup"), ("county", "County Cup", "County Cup"),
         ("league", "League Cup", "League FA Cup"), ("supp", "Supplementary Cup", "Supplementary Cup")]
 TEAM_ORDER = ["First Team", "Reserve Team", "Sunday Team", "Development Team", "Old Boys"]
+NON_TEAMS = {"club"}  # rows in the Teams table that are not teams, such as the Club row for club awards
 ROUND_WORDS = {"semi final": "Semi-final", "semi-final": "Semi-final", "semifinal": "Semi-final",
                "quarter final": "Quarter-final", "quarter-final": "Quarter-final", "quarterfinal": "Quarter-final",
                "winners": "Winners", "winner": "Winners", "final": "Final", "runner up": "Final", "runners up": "Final"}
@@ -330,6 +331,8 @@ def build_teams(rows):
         team, season = flat(getf(r, "Team Name")), flat(getf(r, "Seasons"))
         if not team or not season:
             continue
+        if team.lower() in NON_TEAMS or "," in season:
+            continue  # the Club row holds club-wide awards. It is not a team in one season.
         pos = int(num(getf(r, "Final Position"))) or None
         raw = flat(getf(r, "Promotion")).strip().lower()
         promoted = True if raw in ("yes", "true", "1", "y", "promoted") else False if raw in ("no", "false", "0", "n") else None
@@ -348,18 +351,85 @@ def build_teams(rows):
 
 
 AWARD_PREFIX = {"1st": "First Team", "Res": "Reserve Team", "Dev": "Development Team", "Sun": "Sunday Team"}
+TEAM_NAMES = TEAM_ORDER + ["Club"]
+# Awards that always belong to one team. Matching ignores case, colons and extra spaces.
+TEAM_AWARD_NAMES = ["Player's Player of the Season", "Team Player of the Season", "Manager's Player of the Season",
+                    "Performance of the Season", "Man of the Match", "Goal of the Season", "Top Goalscorer",
+                    "Top Assists", "Cock-up of the Season"]
+CLUB_AWARD_NAMES = ["Coaches Player of the Season", "Best Newcomer", "Highest Appearance",
+                    "PMA Award (Adele Young)", "Chairman's Awards"]
 
 
-def build_awards(rows):
-    out = []
+def award_key(s):
+    return re.sub(r"\s+", " ", s.replace("\u2019", "'")).strip().rstrip(":").strip().lower()
+
+
+CANON = {award_key(n): n for n in TEAM_AWARD_NAMES + CLUB_AWARD_NAMES}
+TEAM_AWARD_KEYS = {award_key(n) for n in TEAM_AWARD_NAMES}
+
+
+def clean_award(a):
+    a = re.sub(r"\s+", " ", a).strip().rstrip(":").strip()
+    return CANON.get(award_key(a), a)
+
+
+def split_prefix(a):
+    """Old style names start with 1st, Res, Dev or Sun. Returns (team or None, award name)."""
+    a = re.sub(r"\s+", " ", a).strip()
+    first, _, rest = a.partition(" ")
+    if first in AWARD_PREFIX and rest:
+        return AWARD_PREFIX[first], clean_award(rest)
+    return None, clean_award(a)
+
+
+def build_awards(rows, team_rows=None):
+    """The Team link on each Award Winners row decides the team. The old name prefix is a fallback."""
+    tmap = {}
+    for t in team_rows or []:
+        tn, ts = flat(getf(t, "Team Name")), flat(getf(t, "Seasons"))
+        if tn and ts:
+            tmap[t.get("id")] = (tn, ts)
+    warn = []
+    if rows and getf(rows[0], "Team") is None:
+        warn.append("The Award Winners table has no Team column, so every award is placed by its name prefix.")
+    out, fallback, seen = [], 0, set()
     for r in rows:
-        a = flat(getf(r, "Awards")).strip().rstrip(":").strip()
         season, name = flat(getf(r, "Seasons")), flat(getf(r, "Name"))
-        if not (a and season and name):
+        raw = flat(getf(r, "Awards"))
+        if not (raw and season and name):
             continue
-        first, _, rest = a.partition(" ")
-        team, cat = (AWARD_PREFIX[first], rest) if first in AWARD_PREFIX and rest else ("Club", a)
+        prefix_team, cat = split_prefix(raw)
+        link = getf(r, "Team")
+        link = link[0] if isinstance(link, list) and link else link
+        team = flat(link) if link else ""
+        link_id = link.get("id") if isinstance(link, dict) else None
+        if team:
+            if team not in TEAM_NAMES:
+                warn.append(f"{name} {season} {cat}: the team '{team}' is not one of {TEAM_NAMES}.")
+            if prefix_team and prefix_team != team:
+                warn.append(f"{name} {season} {cat}: the award name says {prefix_team} but the Team column says {team}.")
+            if team != "Club" and link_id in tmap and tmap[link_id][1] != season:
+                warn.append(f"{name} {cat}: the award is for {season} but its Team row is {tmap[link_id][0]} {tmap[link_id][1]}.")
+        elif prefix_team:
+            team, fallback = prefix_team, fallback + 1
+        elif award_key(cat) in TEAM_AWARD_KEYS:
+            warn.append(f"{name} {season} {cat}: no Team set, so this award is left out.")
+            continue
+        else:
+            team = "Club"
+        seen.add((team, season))
         out.append([season, team, cat, name])
+    if fallback:
+        warn.append(f"{fallback} awards had no Team and were placed by their name prefix.")
+    done = sorted({(flat(getf(t, "Team Name")), flat(getf(t, "Seasons"))) for t in team_rows or []
+                   if int(num(getf(t, "Final Position"))) and flat(getf(t, "Team Name")).lower() not in NON_TEAMS})
+    bare = [f"{t} {s}" for t, s in done if (t, s) not in seen]
+    if bare:
+        warn.append("No awards recorded for: " + ", ".join(bare) + ".")
+    for w in warn[:40]:
+        print("Check:", w)
+    if len(warn) > 40:
+        print(f"Check: {len(warn) - 40} more.")
     out.sort(key=lambda x: (x[0], x[1], x[2], x[3]))
     print(f"Awards: {len(out)} awards.")
     return dict(rows=out)
@@ -440,7 +510,7 @@ def main():
         write_json(os.path.join(out_dir, "teams.json"), build_teams(trows), "teams.json")
     if arows is not None:
         check_fields(arows, ["Awards", "Seasons", "Name"], "Award Winners")
-        write_json(os.path.join(out_dir, "awards.json"), build_awards(arows), "awards.json")
+        write_json(os.path.join(out_dir, "awards.json"), build_awards(arows, trows), "awards.json")
 
 
 if __name__ == "__main__":

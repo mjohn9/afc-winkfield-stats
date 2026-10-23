@@ -99,9 +99,9 @@ footer{text-align:center;font-size:13px;color:var(--muted);padding-top:8px}
 const TL={"First Team":"Firsts","Reserve Team":"Reserves","Sunday Team":"Sundays","Development Team":"Development","Old Boys":"Old Boys"};
 const TEAMS=Object.keys(TL);
 const CARET='<svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A39D90" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
-const CATS=["Player's Player of the Season","Team Player of the Season","Manager's Player of the Season","Performance of the Season","Man of the Match","Goal of the Season","Top goalscorer","Top Assists","Cock-up of the Season"];
+const CATS=["Player's Player of the Season","Team Player of the Season","Manager's Player of the Season","Performance of the Season","Man of the Match","Goal of the Season","Top Goalscorer","Top Assists","Cock-up of the Season"];
 const FUN="Cock-up of the Season";
-const AWICON={"Player's Player of the Season":"medal","Team Player of the Season":"medal","Manager's Player of the Season":"medal","Top goalscorer":"cup","Top Assists":"cup"};
+const AWICON={"Player's Player of the Season":"medal","Team Player of the Season":"medal","Manager's Player of the Season":"medal","Top Goalscorer":"cup","Top Assists":"cup"};
 const showFun=(typeof SHOW_FUN_AWARDS==="undefined")?true:SHOW_FUN_AWARDS;
 let T=null,A=null,S={team:"all",season:null};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -195,8 +195,8 @@ function render(){
       const teams=TEAMS.filter(t=>ar.some(r=>r[1]===t));
       const sh=[];
       if(S.team==="all"){
-        for(const cat of ["Player's Player of the Season","Top goalscorer"]){
-          const its=teams.map(t=>find(t,cat)).filter(Boolean).map(r=>item(cat==="Top goalscorer"?"cup":"medal",esc(r[3]),TL[r[1]]||esc(r[1]),""));
+        for(const cat of ["Player's Player of the Season","Top Goalscorer"]){
+          const its=teams.map(t=>find(t,cat)).filter(Boolean).map(r=>item(cat==="Top Goalscorer"?"cup":"medal",esc(r[3]),TL[r[1]]||esc(r[1]),""));
           if(its.length)sh.push(shelf(cat,its,3));
         }
         const club=ar.filter(r=>r[1]==="Club").map(r=>item("shield",esc(r[3]),esc(r[2].replace(" of the Season","")),""));
