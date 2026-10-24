@@ -17,6 +17,11 @@ Optional tables for the trophy room page (write teams.json and awards.json):
   TABLE_TEAMS   Teams table: Team Name, Seasons, Final Position, Promotion, Division and the cup columns
   TABLE_AWARDS  Award Winners table: Awards, Seasons, Name, Team (a link to the Teams table row for that season)
 
+Optional opt-out (Baserow mode only):
+  TABLE_PLAYERS  Players table with a Boolean column named "Hide from Site". A ticked player is left out of
+                 every file: appearances, stats, teammates, managers and awards. If this is set and the table
+                 or column cannot be read, the build stops, so a hidden player never goes public by mistake.
+
 Test mode reads the Excel workbook instead:  python build_data.py --xlsx stats.xlsx
 
 Fields used
@@ -29,13 +34,16 @@ from datetime import date
 from collections import defaultdict, Counter
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
+from urllib.parse import quote
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
 
 
 # ---------- loading ----------
-def fetch_table(api, token, table_id):
+def fetch_table(api, token, table_id, include=None):
     rows, url = [], f"{api}/api/database/rows/table/{table_id}/?user_field_names=true&size=200"
+    if include:  # ask Baserow for these fields only
+        url += "&include=" + quote(",".join(include), safe=",")
     while url:
         for attempt in range(5):
             try:
@@ -52,6 +60,29 @@ def fetch_table(api, token, table_id):
         rows += page["results"]
         url = page.get("next")
     return rows
+
+
+HIDE_FIELD = "Hide from Site"
+
+
+def hidden_names(api, token, table_id):
+    """Names of players ticked Hide from Site. Stops the build if the table or column is unreadable."""
+    try:
+        rows = fetch_table(api, token, table_id, include=["Name", HIDE_FIELD])
+    except SystemExit:  # an older Baserow version may refuse the include option, so ask for every field
+        rows = fetch_table(api, token, table_id)
+    if rows and HIDE_FIELD not in rows[0]:
+        raise SystemExit(f"The Players table has no '{HIDE_FIELD}' column (or the token cannot read it). "
+                         "Add the Boolean column or fix the token. The build stopped so nobody is shown by mistake.")
+    hide = {flat(r.get("Name")).casefold() for r in rows if r.get(HIDE_FIELD) is True and flat(r.get("Name"))}
+    print(f"Hidden players: {len(hide)}.")  # the count only. Action logs are public, so names stay out
+    return hide
+
+
+def drop_hidden(rows, hide):
+    if not hide or rows is None:
+        return rows
+    return [r for r in rows if flat(r.get("Name")).casefold() not in hide]
 
 
 def load_csv(url, label):
@@ -475,6 +506,14 @@ def main():
         if os.environ.get("TABLE_MATCHES"):
             mt = fetch_table(api, token, os.environ["TABLE_MATCHES"])
 
+    hide = set()
+    if os.environ.get("TABLE_PLAYERS") and os.environ.get("BASEROW_TOKEN"):
+        hide = hidden_names(os.environ.get("BASEROW_API", "https://api.baserow.io").rstrip("/"),
+                            os.environ["BASEROW_TOKEN"], os.environ["TABLE_PLAYERS"])
+    else:
+        print("No Players table set (TABLE_PLAYERS), so nobody is hidden.")
+    app, st = drop_hidden(app, hide), drop_hidden(st, hide)
+
     check_fields(app, ["Name", "Match ID", "Season", "Team", "Manager", "Opponent", "Win (Number)", "Draw", "Loss", "Clean Sheet"], "Appearances")
     check_fields(st, ["Name", "Season", "Goals", "Assists", "Yellow Cards", "Red Cards"], "Season Stats")
     data = build(app, st)
@@ -505,6 +544,7 @@ def main():
         arows = load_local_csv(sys.argv[sys.argv.index("--awards-csv") + 1])
     elif os.environ.get("TABLE_AWARDS") and token:
         arows = fetch_table(api, token, os.environ["TABLE_AWARDS"])
+    arows = drop_hidden(arows, hide)
     if trows is not None:
         check_fields(trows, ["Team Name", "Seasons", "Final Position"], "Teams")
         write_json(os.path.join(out_dir, "teams.json"), build_teams(trows), "teams.json")

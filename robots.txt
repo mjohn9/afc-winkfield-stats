@@ -1,0 +1,8 @@
+# Keep search engines away from the pages and the data files.
+# Pages stay crawlable so that link previews work. Each page carries a noindex tag.
+User-agent: *
+Disallow: /data.json
+Disallow: /club.json
+Disallow: /managers.json
+Disallow: /teams.json
+Disallow: /awards.json
