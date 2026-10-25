@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About AFC Winkfield</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="description" content="About AFC Winkfield FC: our teams, where we play and train, and how to join.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AFC Winkfield">
+<meta property="og:title" content="About AFC Winkfield">
+<meta property="og:description" content="About AFC Winkfield FC: our teams, where we play and train, and how to join.">
+<meta property="og:image" content="https://www.afcwinkfield.com/share.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.afcwinkfield.com/share.png">
+<link rel="icon" href="badge.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D0D0E;--card:#17171A;--line:#2A2A2E;--text:#F2EEE6;--muted:#A39D90;--gold:#D1A04A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Barlow',system-ui,sans-serif;padding:32px 48px 48px;display:flex;justify-content:center}
+@media(max-width:700px){body{padding:20px 20px 40px}}
+a{color:inherit}
+.wrap{width:100%;max-width:1280px;display:flex;flex-direction:column;gap:20px}
+.lab{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;flex:1 1 300px;min-width:0}
+.card.full{flex:1 1 100%}
+.wrap>.card{flex:0 0 auto}
+.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
+@media(max-width:700px){.card{padding:20px}}
+h2.sec{margin:12px 0 -4px;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:600}
+header{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:18px}
+.brand img{height:84px;width:auto;display:block}
+@media(max-width:700px){.brand img{height:60px}}
+h1{margin:0;font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
+@media(max-width:700px){h1{font-size:26px}}
+.nav{display:flex;gap:8px;flex-wrap:wrap}
+.nav a{padding:10px 18px;border:1px solid var(--line);border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;color:var(--muted)}
+.nav a.on{border-color:var(--gold);color:var(--gold)}
+.hero{display:flex;flex-wrap:wrap;gap:28px;align-items:center;background:linear-gradient(135deg,#1d1a14,#17171A 60%);border-color:#3a3226}
+.hero .txt{flex:1 1 360px}
+.hero h2{margin:6px 0 12px;font-family:'Barlow Condensed',sans-serif;font-size:64px;line-height:1;font-weight:700;text-transform:uppercase}
+.hero h2 span{color:var(--gold)}
+@media(max-width:700px){.hero h2{font-size:44px}}
+.hero p{margin:0;font-size:18px;line-height:1.5;color:var(--muted);max-width:560px}
+.chips{display:flex;gap:12px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:14px;padding:14px 20px;min-width:110px;text-align:center;background:var(--bg)}
+.chip b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:44px;color:var(--gold);line-height:1}
+.chip span{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.join{display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:space-between;border-color:var(--gold)}
+.join h3{margin:4px 0 6px;font-family:'Barlow Condensed',sans-serif;font-size:32px;text-transform:uppercase}
+.join p{margin:0;color:var(--muted);max-width:640px;line-height:1.5}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 26px;border-radius:999px;background:var(--gold);color:#0D0D0E;font-weight:700;font-size:16px;text-decoration:none;border:0;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--gold);border:1px solid var(--gold);min-height:44px;padding:0 20px;font-size:14px}
+.team h3,.venue h3{margin:6px 0 4px;font-family:'Barlow Condensed',sans-serif;font-size:28px;text-transform:uppercase}
+.team .div{color:var(--gold);font-weight:600;font-size:15px;margin-bottom:14px}
+.venue p{margin:0 0 6px;color:var(--muted);line-height:1.45}
+.venue .who{display:inline-block;margin:0 0 10px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:#0D0D0E;background:var(--gold);border-radius:999px;padding:4px 12px}
+.venue .time{font-family:'Barlow Condensed',sans-serif;font-size:30px;color:var(--text);margin:6px 0 10px}
+.venue .btn{margin-top:10px}
+.ph{border-bottom:1px dashed var(--gold);color:var(--gold)}
+.small{font-size:14px;color:var(--muted);line-height:1.5}
+.small b{color:var(--text)}
+.note{border:1px dashed var(--line);border-radius:14px;padding:14px 18px;font-size:14px;color:var(--muted)}
+footer{text-align:center;font-size:13px;color:var(--muted);padding-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <div class="brand"><img src="badge.png" alt="AFC Winkfield badge"><div><div class="lab">AFC Winkfield</div><h1>About the club</h1></div></div>
+    <nav class="nav"><a href="index.html">Players</a><a href="club.html">Club</a><a href="managers.html">Managers</a><a href="trophies.html">Trophies</a><a href="about.html" class="on">About</a></nav>
+  </header>
+
+  <section class="card hero">
+    <div class="txt">
+      <div class="lab">Founded 2019</div>
+      <h2>Four teams. <span>One stag.</span></h2>
+      <p>AFC Winkfield runs a First Team, a Reserve Team, a Development Team and an Old Boys side. This site holds every appearance, goal and award we have recorded.</p>
+    </div>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="card join">
+    <div>
+      <div class="lab">Players</div>
+      <h3>Join us on Spond</h3>
+      <p>Spond is where we confirm availability, pay subs and match fees, and send fixtures. New to the club? Message us for a session and an invite.</p>
+    </div>
+    <a class="btn" href="#" id="spond" target="_blank" rel="noopener noreferrer">Open Spond</a>
+  </section>
+
+  <h2 class="sec">Our teams</h2>
+  <div class="teams" id="teams"></div>
+
+  <h2 class="sec">Where we play</h2>
+  <div class="row">
+    <section class="card venue">
+      <div class="who">Firsts and Reserves</div>
+      <h3>Locks Ride</h3>
+      <p>Locks Ride, Winkfield Row<br>Bracknell RG42 7AD</p>
+      <a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=Locks+Ride%2C+Winkfield+Row%2C+Bracknell+RG42+7AD" target="_blank" rel="noopener noreferrer" data-t="maps/locks-ride">Open in Maps</a>
+    </section>
+    <section class="card venue">
+      <div class="who">Development</div>
+      <h3>Bracknell Leisure Centre</h3>
+      <p>Bagshot Road<br>Bracknell RG12 9SE</p>
+      <a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=Bracknell+Leisure+Centre%2C+Bagshot+Rd%2C+Bracknell+RG12+9SE" target="_blank" rel="noopener noreferrer" data-t="maps/bracknell-leisure-centre">Open in Maps</a>
+    </section>
+    <section class="card venue">
+      <div class="who">Old Boys</div>
+      <h3>The Garrison Sports Ground</h3>
+      <p>Kings Road, Windsor SL4 2BA</p>
+      <a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=The+Garrison+Sports+Ground%2C+Kings+Road%2C+Windsor+SL4+2BA" target="_blank" rel="noopener noreferrer" data-t="maps/garrison">Open in Maps</a>
+    </section>
+  </div>
+
+  <h2 class="sec">Where we train</h2>
+  <div class="row">
+    <section class="card venue">
+      <div class="who">Firsts and Reserves</div>
+      <h3>Larges Lane</h3>
+      <div class="time">Wednesday, 8:00 to 9:30pm</div>
+      <p>Larges Lane Playing Fields<br>Larges Lane, Bracknell RG12 9AW</p>
+      <a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=Larges+Lane+Playing+Fields%2C+Larges+Lane%2C+Bracknell+RG12+9AW" target="_blank" rel="noopener noreferrer" data-t="maps/larges-lane">Open in Maps</a>
+    </section>
+    <section class="card venue">
+      <div class="who">Development</div>
+      <h3>Bracknell Leisure Centre</h3>
+      <div class="time">Wednesday, 8:00 to 9:00pm</div>
+      <p>Bagshot Road<br>Bracknell RG12 9SE</p>
+      <a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=Bracknell+Leisure+Centre%2C+Bagshot+Rd%2C+Bracknell+RG12+9SE" target="_blank" rel="noopener noreferrer" data-t="maps/bracknell-leisure-centre-training">Open in Maps</a>
+    </section>
+  </div>
+  <div class="note">Training times can change in winter and over holidays. Spond always shows the latest.</div>
+
+  <div class="row">
+    <section class="card">
+      <div class="lab">Contact</div>
+      <p class="small" style="font-size:16px;margin:10px 0 14px">Questions, a trial session or a name removal.</p>
+      <a class="btn ghost" href="#" id="mail"></a>
+    </section>
+    <section class="card">
+      <div class="lab">About this site</div>
+      <p class="small" style="margin:10px 0 0">The site shows <b>names and match stats only</b>. It asks search engines not to list it. GoatCounter counts visits without cookies. To have your name taken off, use the contact address above and it comes off within the hour.</p>
+    </section>
+  </div>
+
+  <div id="soc"></div>
+  <footer>AFC Winkfield FC</footer>
+</div>
+<script src="config.js"></script>
+<script>
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const LABEL={"First Team":"Firsts","Reserve Team":"Reserves","Development Team":"Development","Old Boys":"Old Boys"};
+const ORDER=["First Team","Reserve Team","Development Team","Old Boys"];
+document.getElementById("soc").innerHTML=socialLinks();
+const sp=document.getElementById("spond");sp.href=CLUB.spond;sp.addEventListener("click",()=>track("about/spond","Spond link"));
+// the email address is assembled here so it does not sit in the page as plain text
+const addr=CLUB.email.join("@"),ml=document.getElementById("mail");ml.href="mailto:"+addr;ml.textContent=addr;ml.addEventListener("click",()=>track("about/email","Email link"));
+track("about","About");
+document.querySelectorAll("[data-t]").forEach(a=>a.addEventListener("click",()=>track(a.dataset.t,"Map: "+a.dataset.t)));
+
+// teams and divisions come from the Teams table, so they stay current each season
+fetch("teams.json").then(r=>r.json()).then(T=>{
+  const last=T.rows.map(r=>r.season).sort().pop();
+  const cur={};
+  for(const r of T.rows)if(r.season===last)cur[r.team]=r;
+  document.getElementById("teams").innerHTML=ORDER.filter(t=>cur[t]).map(t=>`
+    <section class="card team"><div class="lab">Season ${esc(last)}</div><h3>${LABEL[t]}</h3>
+    <div class="div">${esc(cur[t].div||"League to be confirmed")}</div>
+    ${CLUB.fulltime[t]?`<a class="btn ghost" href="${esc(CLUB.fulltime[t])}" target="_blank" rel="noopener noreferrer" data-t="fulltime/${esc(t)}">Fixtures and table</a>`:""}</section>`).join("");
+  document.querySelectorAll("#teams [data-t]").forEach(a=>a.addEventListener("click",()=>track(a.dataset.t,"FA Full-Time: "+a.dataset.t)));
+}).catch(()=>{document.getElementById("teams").innerHTML=""});
+
+// club totals come from the data files
+Promise.all([fetch("club.json").then(r=>r.json()),fetch("data.json").then(r=>r.json())]).then(([C,D])=>{
+  const up=n=>Math.floor(n/10)*10+"+";
+  const chips=[[D.seasons.length,"Seasons"],[up(C.matches.length),"Matches"],[up(Object.keys(D.players).length),"Players"]];
+  document.getElementById("chips").innerHTML=chips.map(([n,l])=>`<div class="chip"><b>${n}</b><span>${l}</span></div>`).join("");
+}).catch(()=>{});
+</script>
+</body>
+</html>

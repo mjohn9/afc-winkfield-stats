@@ -172,7 +172,7 @@ function cupCell(v){return !v?'<span class="dim">–</span>':v==="Winners"?`<spa
 function render(){
   let html=`<header><div class="brand"><img src="badge.png" alt="AFC Winkfield badge"><div><div class="lab" style="font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.16em">AFC Winkfield</div><h1>Trophy Room</h1></div></div>
   ${T?`<label class="pick"><span class="lab">Team</span><select id="st" aria-label="Team"><option value="all">All teams</option>${[...new Set(T.rows.map(r=>r.team))].sort((a,b)=>tidx(a)-tidx(b)).map(t=>`<option value="${esc(t)}"${S.team===t?" selected":""}>${TL[t]||esc(t)}</option>`).join("")}</select>${CARET}</label>`:""}</header>
-  <nav class="nav"><a href="index.html">Players</a><a href="club.html">Club</a><a href="managers.html">Managers</a><a href="trophies.html" class="on">Trophies</a></nav>`;
+  <nav class="nav"><a href="index.html">Players</a><a href="club.html">Club</a><a href="managers.html">Managers</a><a href="trophies.html" class="on">Trophies</a><a href="about.html">About</a></nav>`;
   const noSeason=!!(T&&S.team!=="all"&&T.rows.filter(r=>r.team===S.team).every(r=>!r.pos));
   if(noSeason){
     const nm=TL[S.team]||esc(S.team);
