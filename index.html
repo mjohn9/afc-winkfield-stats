@@ -111,9 +111,33 @@ footer{text-align:center;font-size:13px;color:var(--muted);padding-top:8px}
 .gbtn{flex:1 1 120px;min-height:48px;border-radius:12px;border:1px solid var(--gold);background:var(--gold);color:#1D1408;font-weight:700;font-size:16px;cursor:pointer;text-align:center;line-height:46px;text-decoration:none;padding:0 14px}
 .gbtn.alt{background:transparent;color:var(--gold)}
 .ovn{font-size:13px;color:var(--muted);text-align:center}
+/* achievements cabinet */
+.ac-frame{padding:14px;border-radius:14px;background:linear-gradient(135deg,#7A5030,#3B2412 45%,#6B4423);box-shadow:0 24px 40px rgba(0,0,0,.65),inset 0 0 0 2px #8A5F33,inset 0 0 0 5px #2A190B}
+.ac-crown{width:max-content;max-width:100%;margin:0 auto 12px;padding:6px 26px;border-radius:4px;background:linear-gradient(180deg,#E8C777,#A57A2E);color:#1D1408;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.ac-back{position:relative;overflow:hidden;border-radius:6px;padding:18px 0 0;background:radial-gradient(ellipse at 50% 0%,rgba(255,214,140,.22),rgba(255,214,140,0) 62%),linear-gradient(180deg,#1E1610,#0B0807);box-shadow:inset 0 0 50px #000,inset 0 0 0 1px #4A3719}
+.ac-glass{position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,0) 32%,rgba(255,255,255,0) 62%,rgba(255,255,255,.05) 100%)}
+.lab.ac-sl{color:#C9A15A;margin:0 0 4px 16px}
+.ac-row{display:flex;flex-wrap:wrap;align-items:flex-start;margin-bottom:26px}
+.ac-it{width:150px;display:flex;flex-direction:column;align-items:center}
+.ac-glow{width:120px;height:112px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(255,206,120,.3),rgba(255,206,120,0) 68%)}
+.ac-plinth{width:86px;height:10px;margin-top:-2px;border-radius:2px;background:linear-gradient(180deg,#5A3D1A,#2A190B)}
+.ac-pl{width:100%;height:14px;background:linear-gradient(180deg,#B88A47,#6B4A22 55%,#3B2412);border-top:1px solid #D9B36A;box-shadow:0 10px 16px rgba(0,0,0,.6)}
+.ac-fill{flex:1 1 0;min-width:0}
+.ac-plq{width:128px;margin:14px 0 0;padding:6px 5px;border-radius:3px;text-align:center;background:linear-gradient(180deg,#E8C777,#A57A2E);color:#1D1408;font-family:'Barlow Condensed',sans-serif;line-height:1.15;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.ac-p1{font-size:15px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.ac-p2{font-size:13px;font-weight:600}
+.ac-p3{font-size:12px;font-weight:500;opacity:.85}
+@media(max-width:700px){.ac-crown{font-size:15px;letter-spacing:.12em;padding:6px 14px}}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<linearGradient id="acg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0D08C"/><stop offset="1" stop-color="#B07F2E"/></linearGradient>
+<symbol id="ac-cup" viewBox="0 0 64 72"><path d="M16 6h32v20c0 10-7 18-16 18S16 36 16 26z" fill="url(#acg)"/><path d="M16 12H7c0 12 5 20 12 22M48 12h9c0 12-5 20-12 22" fill="none" stroke="#D1A04A" stroke-width="4" stroke-linecap="round"/><rect x="28" y="42" width="8" height="14" fill="#D1A04A"/><path d="M18 58h28l3 10H15z" fill="url(#acg)"/></symbol>
+<symbol id="ac-bowl" viewBox="0 0 64 72"><path d="M8 18h48c0 16-10 26-24 26S8 34 8 18z" fill="url(#acg)"/><path d="M8 22H3c0 8 4 12 9 13M56 22h5c0 8-4 12-9 13" fill="none" stroke="#D1A04A" stroke-width="3.5" stroke-linecap="round"/><rect x="29" y="44" width="6" height="12" fill="#D1A04A"/><path d="M20 58h24l3 10H17z" fill="url(#acg)"/></symbol>
+<symbol id="ac-medal" viewBox="0 0 64 72"><path d="M20 4h10l6 22H26zM34 4h10L38 26H28z" fill="#C8383D"/><circle cx="32" cy="46" r="20" fill="url(#acg)"/><circle cx="32" cy="46" r="13" fill="none" stroke="#7A5A22" stroke-width="2"/><path d="M32 36l3 7 7 1-5 5 1 7-6-4-6 4 1-7-5-5 7-1z" fill="#7A5A22"/></symbol>
+<symbol id="ac-shield" viewBox="0 0 64 72"><path d="M10 8h44v28c0 14-11 24-22 30C21 60 10 50 10 36z" fill="url(#acg)"/><path d="M32 20l4 9 10 1-7 7 2 10-9-5-9 5 2-10-7-7 10-1z" fill="#7A5A22"/></symbol>
+</defs></svg>
 <div class="wrap" id="app"><div id="err">Loading stats…</div></div>
 <script src="config.js"></script>
 <script>
@@ -192,6 +216,7 @@ function render(){
       ${b.op.length?b.op.map(([n,v],i)=>`<div class="opp"><span class="r">${i+1}</span><span class="nm">${esc(n)}</span><b>${v}</b></div>`).join(""):'<div class="empty">No data for this selection.</div>'}</section>
   </div>
   `}
+  ${S.p?'<div id="ach"></div>':''}
   ${S.p?`<section class="card" style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap"><div><h2 style="margin-bottom:4px">Share your stats</h2><div class="sub" style="margin:0">Make a picture of these stats for WhatsApp, Instagram or Facebook.</div></div><button type="button" class="gbtn" id="sharebtn" style="flex:0 0 auto;min-width:220px">Make my card</button></section>`:""}
   ${socialLinks()}
   <footer>AFC Winkfield FC · Updated ${esc(D.updated||"")}${GC_CODE?"<br>Visits and player searches are counted anonymously. No cookies.":""}</footer>`;
@@ -205,6 +230,7 @@ function render(){
   bind(pl,"p",()=>S.p); if(cp){bind(cp,"c",()=>S.c); cp.addEventListener("input",()=>{if(cp.value===""&&S.c){S.c="";}});}
   document.getElementById("se").addEventListener("change",e=>{S.s=e.target.value;track("season/"+S.s,"Season: "+S.s);go()});
   const sb=document.getElementById("sharebtn");if(sb)sb.addEventListener("click",shareCard);
+  if(S.p)loadExtra().then(drawAch);
 }
 function donut(parts,size,th,big,small){
   const r=(size-th)/2,cx=size/2,circ=2*Math.PI*r,tot=parts.reduce((a,p)=>a+p[0],0)||1;let off=0,out="";
@@ -219,6 +245,46 @@ async function loadExtra(){
   const j=u=>fetch(u).then(r=>r.ok?r.json():null).catch(()=>null);
   const [T,A]=await Promise.all([j("teams.json"),j("awards.json")]);
   return EXTRA={T,A};
+}
+const ACH_ICON={"Player's Player of the Season":"medal","Team Player of the Season":"medal","Manager's Player of the Season":"medal","Top Goalscorer":"cup","Top Assists":"cup"};
+const ACH_TEAM={"First Team":"Firsts","Reserve Team":"Reserves","Sunday Team":"Sundays","Development Team":"Development","Old Boys":"Old Boys","Club":"Club"};
+const acIdx=k=>{const i=TEAMS.findIndex(t=>t[0]===k);return i<0?99:i};
+function acItem(icon,l1,l2,l3){
+  return `<div class="ac-it"><div class="ac-glow"><svg width="84" height="94" viewBox="0 0 64 72" aria-hidden="true"><use href="#ac-${icon}"/></svg></div><div class="ac-plinth"></div><div class="ac-pl"></div><div class="ac-plq"><div class="ac-p1">${l1}</div><div class="ac-p2">${l2}</div>${l3?`<div class="ac-p3">${l3}</div>`:""}</div></div>`;
+}
+function acShelf(label,items){
+  return `<div class="lab ac-sl">${label}</div><div class="ac-row">${items.join("")}<div class="ac-fill"><div style="height:120px"></div><div class="ac-pl"></div></div></div>`;
+}
+// Team honours and personal awards for the chosen player and season. Empty means no section.
+function drawAch(){
+  const el=document.getElementById("ach");if(!el||!S.p||!EXTRA)return;
+  const {T,A}=EXTRA,p=D.players[S.p];
+  const seasons=(S.s==="all"?D.seasons.slice():[S.s]).sort().reverse();
+  const team=[];
+  if(T&&p){
+    for(const s of seasons){
+      const sb=p[s];if(!sb)continue;
+      const rows=Object.entries(sb.t||{}).filter(([,n])=>n>=5)
+        .map(([tm])=>T.rows.find(x=>x.season===s&&x.team===tm)).filter(Boolean)
+        .sort((a,b)=>acIdx(a.team)-acIdx(b.team));
+      for(const r of rows){
+        const who=`${ACH_TEAM[r.team]||esc(r.team)} · ${s}`;
+        if(r.pos===1)team.push(acItem("cup",who,"League champions",esc(r.div||"")));
+        for(const [k,n] of T.cups){if(r.cups[k]==="Winners")team.push(acItem("bowl",who,`${esc(n)} winners`,""))}
+        if(r.promoted===true)team.push(acItem("medal",who,"Promoted",esc([r.pos?ord(r.pos):"",r.div].filter(Boolean).join(" · "))));
+      }
+    }
+  }
+  const fun=(typeof SHOW_FUN_AWARDS==="undefined")?true:SHOW_FUN_AWARDS;
+  const aw=A?A.rows.filter(r=>r[3]===S.p&&(S.s==="all"||r[0]===S.s)&&(fun||r[2]!=="Cock-up of the Season"))
+    .sort((a,b)=>a[0]<b[0]?1:a[0]>b[0]?-1:acIdx(a[1])-acIdx(b[1])):[];
+  const personal=aw.map(r=>acItem(ACH_ICON[r[2]]||"shield",`${ACH_TEAM[r[1]]||esc(r[1])} · ${esc(r[0])}`,esc(r[2]),""));
+  if(!team.length&&!personal.length){el.innerHTML="";return}
+  const shelves=[];
+  if(team.length)shelves.push(acShelf(`Team honours · ${team.length}`,team));
+  if(personal.length)shelves.push(acShelf(`Personal awards · ${personal.length}`,personal));
+  el.innerHTML=`<div class="ac-frame"><div class="ac-crown">Achievements · ${S.s==="all"?"All time":esc(S.s)}</div><div class="ac-back">${shelves.join("")}<div class="ac-glass"></div></div></div>
+    ${team.length?'<div class="sub" style="margin:10px 4px 0">Team honours count where the player made 5 or more appearances for that team in the season.</div>':""}`;
 }
 function cardFacts(){
   const b=blk(S.p,S.s),{T,A}=EXTRA;let promos=0,titles=0,cups=0;
