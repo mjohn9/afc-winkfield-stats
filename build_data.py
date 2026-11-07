@@ -17,6 +17,11 @@ Optional tables for the trophy room page (write teams.json and awards.json):
   TABLE_TEAMS   Teams table: Team Name, Seasons, Final Position, Promotion, Division and the cup columns
   TABLE_AWARDS  Award Winners table: Awards, Seasons, Name, Team (a link to the Teams table row for that season)
 
+Optional goals table (Baserow mode only, needs TABLE_MATCHES too). Adds scoring facts to data.json and club.json:
+  TABLE_GOALS   Goals table: one row per goal. Fields: Matches (link), Players (link), Own Goals (checkbox).
+                Gives each player their most-scored-against opponent, first goal and hat-tricks,
+                and gives the club page its scoring-streak record.
+
 Optional opt-out (Baserow mode only):
   TABLE_PLAYERS  Players table with a Boolean column named "Hide from Site". A ticked player is left out of
                  every file: appearances, stats, teammates, managers and awards. If this is set and the table
@@ -321,6 +326,133 @@ def build_managers(app_rows):
 
 
 
+# ---------- goals: player scoring facts and scoring streaks ----------
+def match_info(match_rows):
+    """Match ID (int) -> dict(date, opp, season, team), read from the Matches table."""
+    info = {}
+    for r in match_rows or []:
+        mid = flat(r.get("Match ID"))
+        if not mid:
+            continue
+        season = flat(r.get("Season"))
+        d, _ = parse_date(r.get("Match Date"), season)
+        info[int(num(mid))] = dict(date=d, opp=flat(r.get("Opponent")), season=season, team=flat(r.get("Teams")))
+    return info
+
+
+def goal_events(goal_rows, info, hide):
+    """One event per goal scored by a named player. Own goals and goals with no player are ignored."""
+    events, nomatch, skipped = [], 0, 0
+    for r in goal_rows or []:
+        if r.get("Own Goals") is True:
+            continue
+        player = flat(r.get("Players"))
+        if not player or player.casefold() in hide:
+            continue
+        mid = flat(r.get("Matches")).split(",")[0].strip()
+        m = info.get(int(num(mid))) if mid else None
+        if not m or not m["date"]:
+            nomatch += 1
+            continue
+        events.append(dict(p=player, mid=int(num(mid)), **m))
+    if nomatch:
+        print(f"Check: {nomatch} goals could not be matched to a match with a date, so they are left out.")
+    print(f"Goals: {len(events)} player goals used.")
+    return events
+
+
+def add_goal_facts(data, events):
+    """Adds to each player block: mo (most scored against), fg (first goal) and ht (hat-tricks).
+    mo = [goals, [up to 3 opponents], number of opponents on that goal count]
+    fg = [date, opponent, team]
+    ht = [[date, opponent, team, goals], ...] for games with 3 or more goals"""
+    by = defaultdict(list)
+    for e in events:
+        by[e["p"]].append(e)
+    for name, evs in by.items():
+        blocks = data["players"].get(name)
+        if not blocks:
+            continue
+        for key in ["all"] + data["seasons"]:
+            if key not in blocks:
+                continue
+            sel = evs if key == "all" else [e for e in evs if e["season"] == key]
+            if not sel:
+                continue
+            against = Counter(e["opp"] for e in sel if e["opp"])
+            if against:
+                best = max(against.values())
+                tied = sorted(o for o, n in against.items() if n == best)
+                blocks[key]["mo"] = [best, tied[:3], len(tied)]
+            first = min(sel, key=lambda e: (e["date"], e["mid"]))
+            blocks[key]["fg"] = [first["date"], first["opp"], first["team"]]
+            per_match = Counter(e["mid"] for e in sel)
+            hats = []
+            for mid, n in per_match.items():
+                if n >= 3:
+                    e = next(x for x in sel if x["mid"] == mid)
+                    hats.append([e["date"], e["opp"], e["team"], n])
+            if hats:
+                blocks[key]["ht"] = sorted(hats)
+    hat_total = sum(1 for b in data["players"].values() if "ht" in b.get("all", {}))
+    print(f"Goal facts added for {len(by)} scorers. {hat_total} players have a hat-trick.")
+
+
+def build_streaks(app_rows, events, info, latest_season):
+    """Longest runs of consecutive appearances, across every team and season, with a goal in each game.
+    A player who misses a match keeps the run alive. A player who plays and does not score ends it."""
+    goals = Counter((e["p"], e["mid"]) for e in events)
+    seen, by = set(), defaultdict(list)
+    undated = 0
+    for r in app_rows:
+        name, mid = flat(r.get("Name")), flat(r.get("Match ID"))
+        if not name or not mid:
+            continue
+        mid = int(num(mid))
+        if (name, mid) in seen:
+            continue  # a duplicate appearance row must not count twice
+        seen.add((name, mid))
+        m = info.get(mid)
+        if not m or not m["date"]:
+            undated += 1
+            continue
+        by[name].append((m["date"], mid, m["season"]))
+    orphan = sum(1 for (p, mid) in goals if (p, mid) not in seen)
+    if undated:
+        print(f"Check: {undated} appearances had no dated match, so they are left out of the streaks.")
+    if orphan:
+        print(f"Check: {orphan} player-matches have goals but no appearance, so those goals cannot count towards a streak.")
+    runs = []
+    for name, apps in by.items():
+        apps.sort()
+        run = []
+
+        def close(is_last):
+            if run:
+                runs.append(dict(p=name, n=len(run), frm=run[0][0], to=run[-1][0],
+                                 g=sum(goals[(name, x[1])] for x in run),
+                                 cur=bool(is_last and run[-1] is apps[-1] and apps[-1][2] == latest_season)))
+        for a in apps:
+            if goals.get((name, a[1]), 0) > 0:
+                run.append(a)
+            else:
+                close(False)
+                run = []
+        close(True)
+    runs = [r for r in runs if r["n"] >= 2]
+    best_per_player = {}
+    for r in runs:
+        b = best_per_player.get(r["p"])
+        if not b or r["n"] > b["n"] or (r["n"] == b["n"] and r["to"] < b["to"]):
+            best_per_player[r["p"]] = r
+    top = sorted(best_per_player.values(), key=lambda r: (-r["n"], r["to"], r["p"]))[:10]
+    cur = sorted((r for r in runs if r["cur"] and r["n"] >= 3), key=lambda r: (-r["n"], r["p"]))[:5]
+    row = lambda r: [r["p"], r["n"], r["frm"], r["to"], r["g"], 1 if r["cur"] else 0]
+    if top:
+        print(f"Streaks: longest run is {top[0]['n']} games.")  # no names, the Action log is public
+    return dict(fields=["player", "n", "from", "to", "goals", "current"], top=[row(r) for r in top], current=[row(r) for r in cur])
+
+
 # ---------- trophy room data ----------
 # Cup columns in the Teams table, left to right: key, name shown on the site, column name in Baserow.
 # Your "League Cup" column holds the Senior Cup and "League FA Cup" holds the League Cup.
@@ -519,6 +651,19 @@ def main():
     data = build(app, st)
     if not data["players"]:
         raise SystemExit("No appearances found. Check the table ids and field names.")
+
+    # goals (optional): player scoring facts for data.json and the streak record for club.json
+    events = info = None
+    if os.environ.get("TABLE_GOALS") and os.environ.get("BASEROW_TOKEN") and mt is not None:
+        api_g = os.environ.get("BASEROW_API", "https://api.baserow.io").rstrip("/")
+        grows = fetch_table(api_g, os.environ["BASEROW_TOKEN"], os.environ["TABLE_GOALS"])
+        if grows and not all(f in grows[0] for f in ("Matches", "Players", "Own Goals")):
+            raise SystemExit("The Goals table needs the fields Matches, Players and Own Goals. Check the table id and the token.")
+        info = match_info(mt)
+        events = goal_events(grows, info, hide)
+        add_goal_facts(data, events)
+    else:
+        print("No Goals table set (TABLE_GOALS, with TABLE_MATCHES), so the scoring facts and streaks are left out.")
     write_json(OUT, data, "data.json")
     write_json(os.path.join(os.path.dirname(OUT), "managers.json"), build_managers(app), "managers.json")
 
@@ -527,6 +672,8 @@ def main():
         club = build_club(mt)
         if not club["matches"]:
             raise SystemExit("No usable matches found. Check the Matches table fields.")
+        if events is not None:
+            club["streaks"] = build_streaks(app, events, info, data["seasons"][-1])
         write_json(os.path.join(os.path.dirname(OUT), "club.json"), club, "club.json")
     else:
         print("No Matches table set (TABLE_MATCHES), so club.json was not updated.")

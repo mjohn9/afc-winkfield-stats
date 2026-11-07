@@ -278,6 +278,7 @@ function render(){
       ${streakRec("Longest unbeaten run",unb)}${streakRec("Longest winning run",wins)}${streakRec("Longest clean sheet run",cs)}
       ${!win&&!goals&&!unb?'<div class="empty">No matches for this selection.</div>':""}
     </section>
+    ${scoringStreaks()}
     <section class="card"><h2>Single-season player records</h2><div class="sub">All teams, all seasons</div>
       ${sRec.map(r=>`<div class="rec"><div><div class="k">${r.l}</div><div class="d">${holders(r.h)}</div></div><div class="v">${r.h.max}</div></div>`).join("")}
     </section>
@@ -315,6 +316,23 @@ function render(){
     setRv(a.dataset.rv);document.getElementById("rv").scrollIntoView({behavior:"smooth",block:"start"});
   });
   oppRows();drawRivals();
+}
+// Scoring streaks: consecutive appearances with a goal in each game, all teams and seasons.
+function scoringStreaks(){
+  const st=C.streaks;if(!st||!st.top||!st.top.length)return"";
+  const R=a=>({p:a[0],n:a[1],from:a[2],to:a[3],g:a[4],cur:a[5]===1});
+  const top=st.top.map(R),max=top[0].n,hold=top.filter(r=>r.n===max);
+  const link=n=>`<a href="index.html?p=${encodeURIComponent(n)}" style="text-decoration:none">${esc(n)}</a>`;
+  const range=r=>`${fmtDate(r.from)} to ${fmtDate(r.to)}`;
+  const rec=`<div class="rec"><div><div class="k">Most consecutive games scoring</div><div class="d">${hold.slice(0,3).map(r=>link(r.p)).join(", ")}${hold.length>3?` and ${hold.length-3} more`:""}${hold.length===1?`, ${range(hold[0])}, ${hold[0].g} ${hold[0].g===1?"goal":"goals"}`:""}</div></div><div class="v">${max} games</div></div>`;
+  const mon=iso=>new Date(iso+"T00:00:00").toLocaleDateString("en-GB",{month:"short",year:"numeric"});
+  const next=top.filter(r=>r.n<max).slice(0,4).map(r=>`<tr><td class="nm">${link(r.p)}<div class="note" style="margin:2px 0 0">Ended ${mon(r.to)}</div></td><td>${r.n}</td><td>${r.g}</td></tr>`).join("");
+  const cur=(st.current||[]).map(R);
+  return `<section class="card"><h2>Scoring streaks</h2><div class="sub">All teams, all seasons. Games played, with a goal in every one.</div>
+    ${rec}
+    ${next?`<div class="scroll" style="margin-top:6px"><table><thead><tr><th>Next best</th><th>Games</th><th>Goals</th></tr></thead><tbody>${next}</tbody></table></div>`:""}
+    ${cur.length?`<div class="rec" style="margin-top:6px"><div><div class="k">Still going</div><div class="d">${cur.map(r=>`${link(r.p)} (${r.n})`).join(", ")}</div></div></div>`:""}
+    <div class="note">A match missed through injury or rest does not break a run. A game played without scoring does.</div></section>`;
 }
 function bestWin(rs){let b=null;for(const m of rs){if(m.res!=="W"||m.gf<=m.ga)continue;const d=m.gf-m.ga;if(!b||d>b.d||(d===b.d&&(m.gf>b.gf||(m.gf===b.gf&&m.date>b.date))))b={...m,d}}return b}
 function mostGoals(rs){let b=null;for(const m of rs){if(!b||m.gf>b.gf||(m.gf===b.gf&&(m.gf-m.ga>b.gf-b.ga||(m.gf-m.ga===b.gf-b.ga&&m.date>b.date))))b=m}return b}
