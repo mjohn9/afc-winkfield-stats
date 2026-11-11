@@ -26,6 +26,7 @@ jobs:
           TABLE_TEAMS: ${{ vars.TABLE_TEAMS }}
           TABLE_AWARDS: ${{ vars.TABLE_AWARDS }}
           TABLE_PLAYERS: ${{ vars.TABLE_PLAYERS }}
+          TABLE_GOALS: ${{ vars.TABLE_GOALS }}
           SHEET_APPEARANCES_URL: ${{ secrets.SHEET_APPEARANCES_URL }}
           SHEET_STATS_URL: ${{ secrets.SHEET_STATS_URL }}
           SHEET_MATCHES_URL: ${{ secrets.SHEET_MATCHES_URL }}
